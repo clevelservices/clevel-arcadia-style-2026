@@ -1,12 +1,12 @@
 ---
 import { questions, programmes, risks, blockers, verdicts, officialLinks } from '../../data/wizard';
-import { ui, CALENDAR_URL, EMAIL, type Lang } from '../../i18n/ui';
+import { ui, routes, CALENDAR_URL, type Lang } from '../../i18n/ui';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = ui[lang];
 const L = lang === 'tr'
-  ? { q: 'Soru', back: 'Geri', restart: 'Baştan başla', result: 'Sonuç', meter: 'Kendin yap hazırlığı', prog: 'Bakmanız gereken program aileleri', risks: 'Kendiniz yaparsanız dikkat edin', noProg: 'Seçimlerinize uyan belirgin bir program ailesi çıkmadı; proje bir programa göre yeniden kurgulanmalı olabilir.', noRisks: 'Belirgin bir risk noktası görünmüyor.', links: 'Resmi kaynaklar', send: 'Özeti e-postayla gönder', subject: 'Kendin Yap Testi sonucum' }
-  : { q: 'Question', back: 'Back', restart: 'Start again', result: 'Result', meter: 'Do-it-yourself readiness', prog: 'Programme families to look at', risks: 'Watch out for these if you go it alone', noProg: 'No clear programme family matches; the project may need reshaping to fit one.', noRisks: 'No clear risk points.', links: 'Official sources', send: 'Email the summary', subject: 'My self-check result' };
+  ? { q: 'Soru', back: 'Geri', restart: 'Baştan başla', result: 'Sonuç', meter: 'Kendin yap hazırlığı', prog: 'Bakmanız gereken program aileleri', risks: 'Kendiniz yaparsanız dikkat edin', noProg: 'Seçimlerinize uyan belirgin bir program ailesi çıkmadı; proje bir programa göre yeniden kurgulanmalı olabilir.', noRisks: 'Belirgin bir risk noktası görünmüyor.', links: 'Resmi kaynaklar', send: 'Sonucu kendime e-postayla gönder', subject: 'Kendin Yap Testi sonucum', leadTitle: 'Sonucunuzu ve iletişim bilgilerinizi bize de gönderin, size ulaşalım', leadBody: 'Sonucunuzu birlikte değerlendirip size dönüş yapalım. Ücret ya da taahhüt yok.', name: 'Ad soyad', company: 'Şirket', email: 'E-posta', phone: 'Telefon', note: 'Eklemek istedikleriniz', optional: 'isteğe bağlı', consentA: 'Bilgilerimin ve test sonucumun, talebime dönüş yapılması amacıyla işlenmesini ve Clevel Services’in kullandığı yurt dışındaki altyapı sağlayıcısında saklanmasını kabul ediyorum.', consentB: 'Aydınlatma metni', submit: 'Gönder', sending: 'Gönderiliyor…', ok: 'Teşekkürler, bilgileriniz bize ulaştı. Kısa süre içinde size dönüş yapacağız.', fail: 'Gönderilemedi. Lütfen biraz sonra yeniden deneyin ya da info@clevel.services adresine yazın.', invalid: 'Lütfen ad soyad, geçerli bir e-posta adresi girin ve onay kutusunu işaretleyin.', usage: 'Bu test şimdiye kadar {n} kez tamamlandı.' }
+  : { q: 'Question', back: 'Back', restart: 'Start again', result: 'Result', meter: 'Do-it-yourself readiness', prog: 'Programme families to look at', risks: 'Watch out for these if you go it alone', noProg: 'No clear programme family matches; the project may need reshaping to fit one.', noRisks: 'No clear risk points.', links: 'Official sources', send: 'Email the result to myself', subject: 'My self-check result', leadTitle: 'Send us your result and contact details, and we’ll get in touch', leadBody: 'We’ll go through your result together and get back to you. No fee, no commitment.', name: 'Full name', company: 'Company', email: 'Email', phone: 'Phone', note: 'Anything to add', optional: 'optional', consentA: 'I agree that my details and test result are processed so that you can reply to my request, and stored with the overseas infrastructure provider Clevel Services uses.', consentB: 'Privacy notice', submit: 'Send', sending: 'Sending…', ok: 'Thank you, we have received your details. We’ll get back to you shortly.', fail: 'Could not send. Please try again shortly or write to info@clevel.services.', invalid: 'Please enter your name, a valid email address and tick the consent box.', usage: 'This test has been completed {n} times so far.' };
 const pick = (x: any) => (typeof x === 'string' ? x : x[lang]);
 const data = {
   questions: questions.map((q) => ({ id: q.id, options: q.options.map((o) => ({ id: o.id, points: o.points, flags: o.flags ?? [] })) })),
@@ -14,10 +14,12 @@ const data = {
   risks: Object.fromEntries(Object.entries(risks).map(([k, v]) => [k, v[lang]])),
   blockers,
   verdicts: Object.fromEntries(Object.entries(verdicts).map(([k, v]) => [k, { title: v.title[lang], body: v.body[lang] }])),
-  L, email: EMAIL,
+  L, lang,
 };
+const privacyHref = routes.privacy[lang];
 ---
 <div class="fc" data-fc>
+  <p class="fc-usage" data-usage hidden></p>
   <div class="fc-bar" aria-hidden="true"><span data-bar></span></div>
   <p class="fc-count" data-count aria-live="polite"></p>
   <form data-form>
@@ -51,8 +53,25 @@ const data = {
       <h4>{L.links}</h4>
       <ul>{officialLinks.map((l) => <li><a href={l.url} target="_blank" rel="noopener">{pick(l.name)}</a></li>)}</ul>
     </div>
+    <form class="fc-lead" data-lead novalidate>
+      <h4>{L.leadTitle}</h4>
+      <p class="small muted">{L.leadBody}</p>
+      <div class="fc-grid">
+        <label><span>{L.name}</span><input name="name" autocomplete="name" maxlength="120" required /></label>
+        <label><span>{L.company} <em>({L.optional})</em></span><input name="company" autocomplete="organization" maxlength="160" /></label>
+        <label><span>{L.email}</span><input name="email" type="email" autocomplete="email" maxlength="160" required /></label>
+        <label><span>{L.phone} <em>({L.optional})</em></span><input name="phone" type="tel" autocomplete="tel" maxlength="40" /></label>
+        <label class="wide"><span>{L.note} <em>({L.optional})</em></span><textarea name="note" rows="3" maxlength="1500"></textarea></label>
+        <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
+      </div>
+      <label class="fc-consent"><input type="checkbox" name="consent" required /><span>{L.consentA} <a href={privacyHref} target="_blank" rel="noopener">{L.consentB}</a></span></label>
+      <div class="fc-lead-foot">
+        <button type="submit" class="btn btn--mint" data-lead-btn>{L.submit}</button>
+        <p class="small" data-lead-msg aria-live="polite"></p>
+      </div>
+    </form>
     <div class="btn-row">
-      <a class="btn" data-mail href={`mailto:${EMAIL}`}>{L.send}</a>
+      <a class="btn btn--ghost" data-mail href="mailto:">{L.send}</a>
       <a class="btn btn--ghost" href={CALENDAR_URL} target="_blank" rel="noopener">{t.bookCall}</a>
       <button type="button" class="btn btn--ghost" data-restart>{L.restart}</button>
     </div>
@@ -73,6 +92,12 @@ const data = {
     const bar = root.querySelector<HTMLElement>('[data-bar]')!;
     const result = root.querySelector<HTMLElement>('[data-result]')!;
     const qs: Q[] = data.questions;
+    const usage = root.querySelector<HTMLElement>('[data-usage]')!;
+    const USAGE_MIN = 100;
+    const showUsage = (n: number) => { if (n >= USAGE_MIN) { usage.textContent = data.L.usage.replace('{n}', n.toLocaleString(data.lang === 'tr' ? 'tr-TR' : 'en-GB')); usage.hidden = false; } };
+    fetch('/api/self-check/stats').then((r) => (r.ok ? r.json() : null)).then((j) => j && showUsage(j.completed)).catch(() => {});
+    let counted = false;
+    let lastSummary = '', lastVerdict = '', shownAt = 0;
     const answers: Record<string, string> = {};
     let history: number[] = [];
     let cur = 0;
@@ -121,7 +146,12 @@ const data = {
       const rl = result.querySelector<HTMLElement>('[data-risks]')!; rl.innerHTML = '';
       (rk.length ? rk.map((k) => data.risks[k]) : [data.L.noRisks]).forEach((r: string) => rl.appendChild(li(r)));
       const summary = [v.title, '', `${data.L.prog}:`, ...(progs.length ? progs.map((p: any) => `- ${p.text}`) : ['-']), '', `${data.L.risks}:`, ...(rk.length ? rk.map((k) => `- ${data.risks[k]}`) : ['-'])].join('\n');
-      result.querySelector<HTMLAnchorElement>('[data-mail]')!.href = `mailto:${data.email}?subject=${encodeURIComponent(data.L.subject)}&body=${encodeURIComponent(summary)}`;
+      result.querySelector<HTMLAnchorElement>('[data-mail]')!.href = `mailto:?subject=${encodeURIComponent(data.L.subject)}&body=${encodeURIComponent(summary)}`;
+      lastSummary = summary; lastVerdict = key; shownAt = Date.now();
+      if (!counted) {
+        counted = true;
+        fetch('/api/self-check/complete', { method: 'POST' }).then((r) => (r.ok ? r.json() : null)).then((j) => j && showUsage(j.completed)).catch(() => {});
+      }
       form.hidden = true; count.hidden = true; bar.style.width = '100%'; result.hidden = false;
       result.focus({ preventScroll: true });
       result.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
@@ -129,6 +159,28 @@ const data = {
     root.querySelector('[data-restart]')!.addEventListener('click', () => {
       form.reset(); Object.keys(answers).forEach((k) => delete answers[k]); history = [];
       result.hidden = true; form.hidden = false; count.hidden = false; show(0);
+      if (!lead.classList.contains('is-sent')) { leadMsg.textContent = ''; }
+    });
+    const lead = root.querySelector<HTMLFormElement>('[data-lead]')!;
+    const leadBtn = root.querySelector<HTMLButtonElement>('[data-lead-btn]')!;
+    const leadMsg = root.querySelector<HTMLElement>('[data-lead-msg]')!;
+    lead.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = new FormData(lead);
+      const val = (k: string) => String(f.get(k) || '').trim();
+      if (!val('name') || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')) || !f.get('consent')) { leadMsg.textContent = data.L.invalid; return; }
+      leadBtn.disabled = true; leadBtn.textContent = data.L.sending; leadMsg.textContent = '';
+      try {
+        const r = await fetch('/api/self-check/lead', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name: val('name'), company: val('company'), email: val('email'), phone: val('phone'), note: val('note'), website: val('website'), consent: true, lang: data.lang, verdict: lastVerdict, summary: lastSummary, elapsed: Date.now() - shownAt }),
+        });
+        if (!r.ok) throw new Error(String(r.status));
+        lead.querySelectorAll('input, textarea, button').forEach((x) => ((x as HTMLInputElement).disabled = true));
+        leadBtn.textContent = data.L.submit; leadMsg.textContent = data.L.ok; lead.classList.add('is-sent');
+      } catch {
+        leadBtn.disabled = false; leadBtn.textContent = data.L.submit; leadMsg.textContent = data.L.fail;
+      }
     });
     show(0, false);
   }
@@ -164,5 +216,19 @@ const data = {
   .fc-prog :global(.why) { color: var(--slate); font-size: var(--t-small); }
   .fc-risks :global(li) { padding: 12px 14px; background: var(--cream); border-radius: 10px; font-size: var(--t-small); }
   .fc-links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
-  @media (max-width: 720px) { .fc-cols { grid-template-columns: 1fr; } }
+  .fc-usage { font-size: var(--t-small); color: var(--slate); }
+  .fc-lead { display: grid; gap: 14px; padding: 24px; border-radius: var(--r-card); background: var(--cream); border: 1px solid var(--sage-pale); }
+  .fc-lead h4 { margin: 0; font-size: var(--t-sub); font-weight: 400; letter-spacing: -0.01em; }
+  .fc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+  .fc-grid label { display: grid; gap: 6px; font-size: var(--t-small); }
+  .fc-grid label.wide { grid-column: 1 / -1; }
+  .fc-grid em { font-style: normal; color: var(--muted); }
+  .fc-grid input, .fc-grid textarea { font: inherit; font-size: var(--t-body); padding: 11px 12px; border: 1px solid var(--sage); border-radius: 8px; background: var(--sheet); color: var(--bark); width: 100%; box-sizing: border-box; }
+  .fc-grid input:focus-visible, .fc-grid textarea:focus-visible { outline: 2px solid var(--s1); outline-offset: 1px; }
+  .fc-grid .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .fc-consent { display: flex; gap: 10px; align-items: flex-start; font-size: var(--t-small); color: var(--slate); }
+  .fc-consent input { margin-top: 3px; width: 18px; height: 18px; flex: none; accent-color: var(--canopy); }
+  .fc-lead-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+  .fc-lead.is-sent [data-lead-msg] { color: var(--canopy); font-weight: 500; }
+  @media (max-width: 720px) { .fc-cols { grid-template-columns: 1fr; } .fc-grid { grid-template-columns: 1fr; } }
 </style>

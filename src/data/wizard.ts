@@ -23,17 +23,18 @@ export const questions: Question[] = [
     title: { tr: 'Şirketiniz hangi aşamada?', en: 'What stage is your company at?' },
     options: [
       { id: 'idea', label: { tr: 'Henüz kurulmadı, fikir aşamasında', en: 'Not founded yet, still an idea' }, flags: ['idea'] },
-      { id: 'young', label: { tr: 'Kurulalı 2 yıldan az oldu', en: 'Founded less than 2 years ago' }, flags: ['young'] },
-      { id: 'established', label: { tr: '2 yıldan uzun süredir faaliyette', en: 'Operating for more than 2 years' }, flags: ['established'] },
+      { id: 'young', label: { tr: 'Kurulalı 3 yıldan az oldu', en: 'Founded less than 3 years ago' }, flags: ['young'] },
+      { id: 'established', label: { tr: '3 yıldan uzun süredir faaliyette', en: 'Operating for more than 3 years' }, flags: ['established'] },
     ],
   },
   {
     id: 'goal',
-    title: { tr: 'Destekle ne yapmak istiyorsunuz?', en: 'What do you want the funding for?' },
+    title: { tr: 'Hangi konuda destek arayışınız var?', en: 'What kind of support are you looking for?' },
     options: [
       { id: 'rd', label: { tr: 'Yeni bir ürün ya da teknoloji geliştirmek', en: 'Develop a new product or technology' }, flags: ['goal_rd'] },
       { id: 'commercial', label: { tr: 'Var olan ürünü büyütmek ve satmak', en: 'Grow and sell an existing product' }, flags: ['goal_commercial'] },
       { id: 'export', label: { tr: 'Yurt dışında tanıtım ve satış', en: 'Promote and sell abroad' }, flags: ['goal_export'] },
+      { id: 'eexport', label: { tr: 'Yurt dışı pazaryerlerinde tanıtım ve komisyon', en: 'Promotion and commissions on overseas marketplaces' }, flags: ['goal_eexport'] },
       { id: 'digital', label: { tr: 'Üretimde ya da süreçlerde dijital dönüşüm', en: 'Digital transformation of production or processes' }, flags: ['goal_digital'] },
       { id: 'invest', label: { tr: 'Makine, tesis ya da kapasite yatırımı', en: 'Machinery, facility or capacity investment' }, flags: ['goal_invest'] },
       { id: 'credit', label: { tr: 'Uygun maliyetli kredi ya da finansman bulmak', en: 'Find low-cost loans or financing' }, flags: ['goal_credit'] },
@@ -60,7 +61,7 @@ export const questions: Question[] = [
     title: { tr: 'Daha önce kamu desteği aldınız mı?', en: 'Have you received public funding before?' },
     options: [
       { id: 'never', label: { tr: 'Hayır, ilk kez başvuracağız', en: 'No, this would be our first application' }, points: 0 },
-      { id: 'smooth', label: { tr: 'Evet, sorunsuz kapattık', en: 'Yes, and we closed it without problems' }, points: 2 },
+      { id: 'smooth', label: { tr: 'Evet, sorunsuz tamamladık.', en: 'Yes, and we completed it without problems.' }, points: 2 },
       { id: 'troubled', label: { tr: 'Evet, ama rapor ya da ödemede sorun yaşadık', en: 'Yes, but we had problems with reports or payments' }, points: 0, flags: ['troubled'] },
     ],
   },
@@ -69,7 +70,7 @@ export const questions: Question[] = [
     title: { tr: 'Başvuruyu ve takibi kim yapacak?', en: 'Who would write the application and follow it through?' },
     options: [
       { id: 'nobody', label: { tr: 'Belirli bir kişi yok, ben ya da ortaklarım', en: 'No one in particular, me or my partners' }, points: 0 },
-      { id: 'accountant', label: { tr: 'Mali müşavirimiz', en: 'Our accountant' }, points: 1, flags: ['accountant'] },
+      { id: 'accountant', label: { tr: 'Finans sorumlumuz', en: 'Our finance manager' }, points: 1, flags: ['accountant'] },
       { id: 'experienced', label: { tr: 'Daha önce proje yürütmüş bir çalışanımız', en: 'A staff member who has run funded projects before' }, points: 2 },
     ],
   },
@@ -81,9 +82,9 @@ export const questions: Question[] = [
       en: 'The application takes weeks; implementation and reporting need regular time for the whole project.',
     },
     options: [
-      { id: 'low', label: { tr: '5 saatten az', en: 'Less than 5 hours' }, points: 0, flags: ['low_time'] },
-      { id: 'mid', label: { tr: '5–15 saat', en: '5–15 hours' }, points: 1 },
-      { id: 'high', label: { tr: '15 saatten fazla', en: 'More than 15 hours' }, points: 2 },
+      { id: 'low', label: { tr: '8 saatten az', en: 'Less than 8 hours' }, points: 0, flags: ['low_time'] },
+      { id: 'mid', label: { tr: '8–24 saat', en: '8–24 hours' }, points: 1 },
+      { id: 'high', label: { tr: '24 saatten fazla', en: 'More than 24 hours' }, points: 2 },
     ],
   },
   {
@@ -94,7 +95,7 @@ export const questions: Question[] = [
       en: 'On funded projects, payments usually have to go through a bank and every cost must be documented.',
     },
     options: [
-      { id: 'tidy', label: { tr: 'Hepsi banka üzerinden, belgeler tam', en: 'All through the bank, records complete' }, points: 2 },
+      { id: 'tidy', label: { tr: 'Hepsi bankacılık sistemi üzerinden gerçekleşmektedir ve belgeler tamdır.', en: 'All payments go through the banking system and records are complete.' }, points: 2 },
       { id: 'partly', label: { tr: 'Çoğunlukla düzenli', en: 'Mostly in order' }, points: 1 },
       { id: 'messy', label: { tr: 'Nakit ödemeler ve eksik belgeler var', en: 'Some cash payments and missing records' }, points: 0, flags: ['messy'] },
     ],
@@ -119,7 +120,7 @@ export const questions: Question[] = [
 export const programmes: { when: string[]; unless?: string[]; text: T; why: T }[] = [
   {
     when: ['idea'],
-    text: { tr: 'TÜBİTAK 1512 BiGG ve KOSGEB girişimcilik destekleri', en: 'TÜBİTAK 1512 BiGG and KOSGEB entrepreneurship support' },
+    text: { tr: 'TÜBİTAK BiGG ve KOSGEB girişimcilik destekleri', en: 'TÜBİTAK BiGG and KOSGEB entrepreneurship support' },
     why: { tr: 'Henüz kurulmamış ya da yeni kurulan girişimler için tasarlandılar.', en: 'Designed for start-ups that are not yet founded or newly founded.' },
   },
   {
@@ -131,7 +132,7 @@ export const programmes: { when: string[]; unless?: string[]; text: T; why: T }[
   {
     when: ['goal_rd', 'established'],
     unless: ['no_rd'],
-    text: { tr: 'TÜBİTAK 1501 ya da 1507', en: 'TÜBİTAK 1501 or 1507' },
+    text: { tr: 'TÜBİTAK 1501, 1507 veya 1707', en: 'TÜBİTAK 1501, 1507 or 1707' },
     why: { tr: 'Ölçeğinize ve geçmiş Ar-Ge deneyiminize göre biri öne çıkar.', en: 'One or the other fits better depending on your size and R&D track record.' },
   },
   {
@@ -148,22 +149,27 @@ export const programmes: { when: string[]; unless?: string[]; text: T; why: T }[
   },
   {
     when: ['goal_export'],
-    text: { tr: 'Ticaret Bakanlığı pazara giriş, tanıtım ve fuar destekleri', en: 'Ministry of Trade market entry, promotion and trade-fair support' },
+    text: { tr: 'Ticaret Bakanlığı İhracat Destekleri', en: 'Ministry of Trade export support' },
     why: { tr: 'Yurt dışı tanıtım ve pazara giriş harcamaları için.', en: 'For overseas promotion and market entry costs.' },
   },
   {
+    when: ['goal_eexport'],
+    text: { tr: 'Ticaret Bakanlığı E-İhracat Destekleri', en: 'Ministry of Trade e-export support' },
+    why: { tr: 'Pazaryerlerinde tanıtım ve komisyon desteği için.', en: 'For promotion and commission costs on online marketplaces.' },
+  },
+  {
     when: ['goal_digital'],
-    text: { tr: 'Sanayi ve Teknoloji Bakanlığı Dijital Dönüşüm Programı', en: 'Ministry of Industry and Technology Digital Transformation Programme' },
+    text: { tr: 'Sanayi ve Teknoloji Bakanlığı Dijital Dönüşüm Programı, KOSGEB Dijital Dönüşüm Destek Programı, KOSGEB Kapasite Geliştirme Programı', en: 'Ministry of Industry and Technology Digital Transformation Programme, KOSGEB Digital Transformation Support and KOSGEB Capacity Building programmes' },
     why: { tr: 'Üretimde yazılım, donanım ve dijital çözümlere geçiş için.', en: 'For moving production onto software, hardware and digital solutions.' },
   },
   {
     when: ['goal_invest'],
-    text: { tr: 'Yatırım Teşvik Belgesi ve kalkınma ajansı programları', en: 'Investment Incentive Certificate and development agency programmes' },
+    text: { tr: 'Yatırım Teşvik Belgesi', en: 'Investment Incentive Certificate' },
     why: { tr: 'Makine ve tesis yatırımlarında vergi ve finansman avantajları için.', en: 'For tax and financing advantages on machinery and facility investments.' },
   },
   {
     when: ['goal_invest'],
-    text: { tr: 'Yatırım kredileri ve faiz destekleri', en: 'Investment loans and interest subsidies' },
+    text: { tr: 'Yatırım Kredileri, Yatırım Taahhütlü Avans Kredisi ve faiz destekleri', en: 'Investment loans, the Investment Commitment Advance Loan and interest subsidies' },
     why: { tr: 'Teşvik belgesiyle birlikte finansman maliyetini düşürmek için.', en: 'To lower financing costs alongside the incentive certificate.' },
   },
   {
@@ -193,12 +199,12 @@ export const risks: Record<string, T> = {
     en: 'Past problems with reports or payments suggest the same mistakes may happen again. Work out the cause first.',
   },
   accountant: {
-    tr: 'Mali müşavirler muhasebeyi iyi bilir ama proje metni ve teknik rapor ayrı bir uzmanlıktır.',
-    en: 'Accountants know the books well, but project narratives and technical reports are a different skill.',
+    tr: 'Finans profesyonelleri muhasebeyi iyi bilir ama proje metni ve teknik rapor ayrı bir uzmanlıktır.',
+    en: 'Finance professionals know the books well, but project narratives and technical reports are a different skill.',
   },
   low_time: {
-    tr: 'Ayda 5 saatin altında bir zamanla başvuru ve özellikle raporlama dönemleri aksar.',
-    en: 'With less than 5 hours a month, the application and especially the reporting periods will slip.',
+    tr: 'Ayda 8 saatin altında bir zamanla başvuru ve özellikle raporlama dönemleri aksar.',
+    en: 'With less than 8 hours a month, the application and especially the reporting periods will slip.',
   },
   messy: {
     tr: 'Nakit ödemeler ve eksik belgeler, onaylanmış desteğin ödenmemesinin en yaygın nedenidir.',
@@ -223,14 +229,14 @@ export const maxPoints = 10;
 
 export const verdicts = {
   ready: {
-    title: { tr: 'Bunu kendiniz yapabilirsiniz.', en: 'You can do this yourselves.' },
+    title: { tr: 'Başvuru ve devam süreçlerini yürütmek için yeterliliğe sahipsiniz.', en: 'You have what it takes to run the application and the follow-up.' },
     body: {
-      tr: 'Yanıtlarınıza göre başvuruyu ve takibi kendi ekibinizle yürütebilecek durumdasınız. Danışman tutmanız şart değil. Aşağıdaki risk notlarına göz atın ve resmi kaynaklardan güncel çağrıyı okuyarak başlayın.',
-      en: 'Based on your answers, your own team can run the application and follow-up. You don’t need to hire a consultant. Read the risk notes below and start with the current call on the official sites.',
+      tr: 'Yanıtlarınıza göre başvuruyu ve takibi kendi ekibinizle yürütebilecek durumdasınız. Danışman desteği şart değil. Aşağıdaki risk notlarına göz atın ve resmi kaynaklardan güncel çağrıyı okuyarak başlayın.',
+      en: 'Based on your answers, your own team can run the application and follow-up. Consultant support isn’t essential. Read the risk notes below and start with the current call on the official sites.',
     },
   },
   partial: {
-    title: { tr: 'Kendiniz yapabilirsiniz, ama bazı adımlar riskli.', en: 'You can do it, but some steps are risky.' },
+    title: { tr: 'Kendiniz yapabilirsiniz, ama bazı adımlar riskli ve kayıplar yaşanabilir.', en: 'You can do it, but some steps are risky and you may lose out.' },
     body: {
       tr: 'Temel hazırlığınız var, ama aşağıdaki noktalar başvurunun reddedilmesine ya da onaylanan desteğin kesilmesine yol açabilir. Bu adımlarda tek seferlik bir kontrol ya da kısmi destek almak, tamamını dışarıya vermekten daha mantıklı olabilir.',
       en: 'You have the basics, but the points below can lead to rejection or to approved funding being cut. A one-off review or partial help on these steps may make more sense than outsourcing everything.',

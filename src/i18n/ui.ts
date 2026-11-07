@@ -18,6 +18,7 @@ export const routes = {
   services: { tr: '/hizmetler/', en: '/en/services/' },
   about: { tr: '/hakkimizda/', en: '/en/about/' },
   contact: { tr: '/iletisim/', en: '/en/contact/' },
+  privacy: { tr: '/kvkk/', en: '/en/privacy/' },
 } as const;
 
 export const ui = {
@@ -35,6 +36,7 @@ export const ui = {
     footer: {
       company: 'Clevel Services Danışmanlık A.Ş.',
       rights: 'Tüm hakları saklıdır.',
+      privacy: 'KVKK aydınlatma metni',
       trademark: '“c-level services 155” tescilli markamızdır (TÜRKPATENT 2023 099323).',
     },
   },
@@ -52,6 +54,7 @@ export const ui = {
     footer: {
       company: 'Clevel Services Danışmanlık A.Ş.',
       rights: 'All rights reserved.',
+      privacy: 'Privacy notice',
       trademark: '“c-level services 155” is our registered trademark (TÜRKPATENT 2023 099323).',
     },
   },

@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import { routes, EMAIL, type Lang } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const tr = lang === 'tr';
+const other: Lang = tr ? 'en' : 'tr';
+---
+<Base lang={lang} title={tr ? 'KVKK Aydınlatma Metni | C-Level Services' : 'Privacy Notice | C-Level Services'} description={tr ? 'Kendin Yap Testi ve iletişim formu aracılığıyla toplanan kişisel verilere ilişkin aydınlatma metni.' : 'Privacy notice for personal data collected through the self-check and contact form.'} path={routes.privacy[lang]} alt={routes.privacy[other]}>
+  <section class="band">
+    <div class="wrap pv">
+      {tr ? (
+        <>
+          <h1>KVKK Aydınlatma Metni</h1>
+          <p class="lead">Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında, sitemizdeki Kendin Yap Testi sonuç ekranında yer alan iletişim formu aracılığıyla paylaştığınız kişisel verilerin nasıl işlendiğini açıklar.</p>
+          <h2>Veri sorumlusu</h2>
+          <p>Clevel Services Danışmanlık Anonim Şirketi. İletişim: <a href={`mailto:${EMAIL}`}>{EMAIL}</a></p>
+          <h2>İşlenen veriler</h2>
+          <p>Ad soyad, şirket adı, e-posta adresi, telefon numarası, eklediğiniz not ve test sonucunuzun özeti. Kötüye kullanımı önlemek amacıyla IP adresinizden üretilen ve geri çevrilemeyen bir özet değer de kaydedilir.</p>
+          <h2>İşleme amacı ve hukuki sebebi</h2>
+          <p>Verileriniz yalnızca talebinize dönüş yapmak ve test sonucunuzu sizinle değerlendirmek amacıyla, formda verdiğiniz açık rızaya dayanarak işlenir. Pazarlama listelerine eklenmez ve üçüncü kişilere satılmaz.</p>
+          <h2>Aktarım</h2>
+          <p>Form verileri, sitemizin altyapı hizmetini aldığımız Cloudflare, Inc. sunucularında saklanır ve bu nedenle yurt dışına aktarılmış olur. Bildirim e-postaları şirketimizin Google Workspace hesabına iletilir. Bu aktarımlar için açık rızanız formdaki onay kutusuyla alınır.</p>
+          <h2>Saklama süresi</h2>
+          <p>Verileriniz, talebiniz sonuçlandıktan sonra en fazla iki yıl saklanır ve ardından silinir. Daha önce silinmesini istediğinizde talebiniz üzerine silinir.</p>
+          <h2>Haklarınız</h2>
+          <p>KVKK’nın 11. maddesi uyarınca verilerinizin işlenip işlenmediğini öğrenme, bilgi talep etme, düzeltilmesini ya da silinmesini isteme ve açık rızanızı geri alma haklarına sahipsiniz. Başvurularınızı <a href={`mailto:${EMAIL}`}>{EMAIL}</a> adresine iletebilirsiniz.</p>
+          <p class="small muted">Testin kendisi tarayıcınızda çalışır; formu göndermediğiniz sürece cevaplarınız bize ulaşmaz. Sitede kaç testin tamamlandığı, kişisel veri içermeyen bir sayaçla tutulur.</p>
+        </>
+      ) : (
+        <>
+          <h1>Privacy Notice</h1>
+          <p class="lead">This notice explains, under Turkey’s Personal Data Protection Law No. 6698 (KVKK), how we process the personal data you share through the contact form on the self-check result screen.</p>
+          <h2>Data controller</h2>
+          <p>Clevel Services Danışmanlık Anonim Şirketi. Contact: <a href={`mailto:${EMAIL}`}>{EMAIL}</a></p>
+          <h2>Data processed</h2>
+          <p>Your name, company, email address, phone number, any note you add and a summary of your test result. To prevent abuse we also store a one-way hash derived from your IP address.</p>
+          <h2>Purpose and legal basis</h2>
+          <p>We process your data only to reply to your request and review your result with you, based on the explicit consent you give in the form. It is not added to marketing lists or sold to third parties.</p>
+          <h2>Transfers</h2>
+          <p>Form data is stored on the servers of Cloudflare, Inc., our hosting provider, which means it is transferred abroad. Notification emails go to our company’s Google Workspace account. Your explicit consent to these transfers is given with the tick box in the form.</p>
+          <h2>Retention</h2>
+          <p>We keep your data for no more than two years after your request is closed, then delete it. We delete it earlier if you ask us to.</p>
+          <h2>Your rights</h2>
+          <p>Under Article 11 of the KVKK you can ask whether your data is processed, request information, ask for it to be corrected or deleted, and withdraw your consent. Write to <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.</p>
+          <p class="small muted">The self-check itself runs in your browser; your answers do not reach us unless you send the form. The number of completed tests is kept in a counter that holds no personal data.</p>
+        </>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .pv { display: grid; gap: 14px; max-width: 760px; padding: clamp(40px, 6vw, 80px) 0; }
+  .pv h2 { font-size: var(--t-h3); margin-top: 18px; }
+  .pv a { color: var(--canopy); }
+</style>
