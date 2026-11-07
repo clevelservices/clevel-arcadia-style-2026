@@ -1,0 +1,52 @@
+---
+/** Sub-topics as chips; selecting one shows its one-line explanation. Minimal text until asked for. */
+import type { Sub } from '../data/services';
+import type { Lang } from '../i18n/ui';
+interface Props { subs: Sub[]; lang: Lang; id: string }
+const { subs, lang, id } = Astro.props;
+---
+<div class="chips" data-chips>
+  <div class="chip-list" role="tablist">
+    {subs.map((s, i) => (
+      <button type="button" role="tab" id={`${id}-c${i}`} aria-controls={`${id}-p${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+        {s.t[lang]}
+      </button>
+    ))}
+  </div>
+  {subs.map((s, i) => (
+    <p class="chip-panel" role="tabpanel" id={`${id}-p${i}`} aria-labelledby={`${id}-c${i}`} hidden={i !== 0}>{s.d[lang]}</p>
+  ))}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-chips]').forEach((root) => {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role=tab]'));
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, j) => {
+        t.setAttribute('aria-selected', String(i === j)); t.tabIndex = i === j ? 0 : -1;
+        const p = root.querySelector<HTMLElement>('#' + t.getAttribute('aria-controls')); if (p) p.hidden = i !== j;
+      });
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); select((i + 1) % tabs.length, true); }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); select((i - 1 + tabs.length) % tabs.length, true); }
+      });
+    });
+  });
+</script>
+
+<style>
+  .chips { display: grid; gap: 16px; }
+  .chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip-list button {
+    min-height: 40px; padding: 0 14px; border-radius: var(--r-btn); cursor: pointer;
+    background: var(--sheet); border: 1px solid var(--sage-pale); color: var(--bark);
+    font: 400 var(--t-small) var(--font); text-align: left;
+  }
+  .chip-list button:hover { border-color: var(--canopy); }
+  .chip-list button[aria-selected='true'] { background: var(--canopy); border-color: var(--canopy); color: #fff; }
+  .chip-panel { min-height: 3.2em; color: var(--slate); max-width: 56ch; padding-left: 14px; border-left: 2px solid var(--mint); }
+</style>

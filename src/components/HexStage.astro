@@ -1,0 +1,133 @@
+---
+/**
+ * Home signature: drag a service plate onto the hexagon (the logo mark) to open it.
+ * Plates are ordinary links, so click, tap and keyboard work without dragging.
+ */
+import { services, servicePath } from '../data/services';
+import type { Lang } from '../i18n/ui';
+interface Props { lang: Lang; hint: string; drop: string }
+const { lang, hint, drop } = Astro.props;
+const pos = ['tl', 'bl', 'tr', 'br', 'bc'];
+---
+<div class="stage" data-stage>
+  <div class="drop" data-drop aria-hidden="true">
+    <svg viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="hexMetal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#51504f" /><stop offset=".5" stop-color="#b9bbbe" /><stop offset="1" stop-color="#51504f" />
+        </linearGradient>
+        <clipPath id="hexClip"><polygon points="100,8 180,54 180,146 100,192 20,146 20,54" /></clipPath>
+      </defs>
+      <polygon class="drop-fill" points="100,8 180,54 180,146 100,192 20,146 20,54" />
+      <g clip-path="url(#hexClip)" class="drop-bands">
+        <path d="M58 200 L118 0 L146 0 L86 200 Z" />
+        <path d="M102 200 L162 0 L190 0 L130 200 Z" />
+      </g>
+      <polygon points="100,8 180,54 180,146 100,192 20,146 20,54" fill="none" stroke="url(#hexMetal)" stroke-width="3" />
+    </svg>
+    <span class="drop-label">{drop}</span>
+  </div>
+  <ul class="plates">
+    {services.map((s, i) => (
+      <li class={`slot ${pos[i]}`}>
+        <a class="plate" href={servicePath(s, lang)} data-plate draggable="false">
+          <span class={`orb ${s.tone}`} aria-hidden="true"></span>
+          <span>{s.name[lang]}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <p class="hint">{hint}</p>
+</div>
+
+<script>
+  const stage = document.querySelector<HTMLElement>('[data-stage]');
+  const drop = stage?.querySelector<HTMLElement>('[data-drop]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (stage && drop) {
+    stage.querySelectorAll<HTMLAnchorElement>('[data-plate]').forEach((plate) => {
+      let sx = 0, sy = 0, dragging = false, pid = -1, suppress = false;
+      const over = (x: number, y: number) => { const r = drop.getBoundingClientRect(); return x > r.left && x < r.right && y > r.top && y < r.bottom; };
+      const reset = () => { plate.classList.remove('is-dragging'); plate.style.transform = ''; drop.classList.remove('is-over'); stage.classList.remove('is-active'); };
+      plate.addEventListener('pointerdown', (e) => { if (e.button !== 0) return; sx = e.clientX; sy = e.clientY; pid = e.pointerId; dragging = false; });
+      plate.addEventListener('pointermove', (e) => {
+        if (e.pointerId !== pid) return;
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        if (!dragging && Math.hypot(dx, dy) > 8) { dragging = true; plate.setPointerCapture(pid); plate.classList.add('is-dragging'); stage.classList.add('is-active'); }
+        if (dragging) { e.preventDefault(); plate.style.transform = `translate(${dx}px, ${dy}px)`; drop.classList.toggle('is-over', over(e.clientX, e.clientY)); }
+      });
+      plate.addEventListener('pointerup', (e) => {
+        if (e.pointerId !== pid) return;
+        pid = -1;
+        if (!dragging) return;
+        suppress = true; dragging = false;
+        if (over(e.clientX, e.clientY)) {
+          drop.classList.add('is-accepted');
+          const r = drop.getBoundingClientRect(), p = plate.getBoundingClientRect();
+          const m = new DOMMatrix(getComputedStyle(plate).transform);
+          plate.classList.add('is-accepted');
+          plate.style.transform = `translate(${m.m41 + r.left + r.width / 2 - (p.left + p.width / 2)}px, ${m.m42 + r.top + r.height / 2 - (p.top + p.height / 2)}px) scale(.9)`;
+          setTimeout(() => { window.location.href = plate.href; }, reduce ? 0 : 420);
+        } else reset();
+      });
+      plate.addEventListener('pointercancel', () => { pid = -1; dragging = false; reset(); });
+      plate.addEventListener('click', (e) => { if (suppress) { e.preventDefault(); suppress = false; } });
+    });
+    window.addEventListener('pageshow', () => {
+      stage.querySelectorAll<HTMLElement>('[data-plate]').forEach((p) => { p.classList.remove('is-accepted', 'is-dragging'); p.style.transform = ''; });
+      drop.classList.remove('is-over', 'is-accepted'); stage.classList.remove('is-active');
+    });
+  }
+</script>
+
+<style>
+  .stage { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; }
+  .drop { grid-column: 1 / -1; position: relative; width: min(230px, 62%); margin: 4px auto 10px; aspect-ratio: 1; transition: transform .3s var(--ease); }
+  .drop svg { width: 100%; height: 100%; overflow: visible; }
+  .drop-fill { fill: var(--canopy); transition: fill .25s var(--ease); }
+  .drop-bands path { fill: url(#hexMetal); transition: opacity .25s var(--ease); }
+  .drop-label { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 500; color: var(--bark); opacity: 0; transition: opacity .2s var(--ease); }
+  :global(.stage.is-active) .drop-bands path { opacity: .55; }
+  .drop:global(.is-over) { transform: scale(1.05); }
+  .drop:global(.is-over) .drop-fill { fill: var(--mint); }
+  .drop:global(.is-over) .drop-bands path { opacity: .15; }
+  .drop:global(.is-over) .drop-label { opacity: 1; }
+  .drop:global(.is-accepted) .drop-fill { fill: var(--mint); }
+  .drop:global(.is-accepted) .drop-bands path { opacity: 0; }
+
+  .plates { display: contents; list-style: none; }
+  .slot { list-style: none; }
+  .slot.bc { grid-column: 1 / -1; justify-self: center; }
+  .plate {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 60px;
+    background: var(--sheet); border: 1px solid var(--sage-pale); border-radius: 12px;
+    color: var(--bark); text-decoration: none; font-size: var(--t-small); font-weight: 500; line-height: 1.25;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+    transition: border-color .2s var(--ease);
+  }
+  .plate:hover { border-color: var(--canopy); }
+  .plate:global(.is-dragging) { position: relative; z-index: 5; cursor: grabbing; border-color: var(--canopy); }
+  .plate:global(.is-accepted) { transition: transform .4s var(--ease); }
+  .orb { width: 22px; height: 22px; border-radius: 50%; flex: none; }
+  .orb.s1 { background: radial-gradient(circle at 35% 30%, #9cc3df, var(--s1)); }
+  .orb.s2 { background: radial-gradient(circle at 35% 30%, #93c6cf, var(--s2)); }
+  .orb.s3 { background: radial-gradient(circle at 35% 30%, #94cbbb, var(--s3)); }
+  .orb.s4 { background: radial-gradient(circle at 35% 30%, #a3cfa9, var(--s4)); }
+  .orb.s5 { background: radial-gradient(circle at 35% 30%, #a9d39b, var(--s5)); }
+  .hint { grid-column: 1 / -1; text-align: center; font-size: var(--t-cap); color: var(--muted); margin-top: 6px; }
+
+  @media (min-width: 900px) {
+    .stage {
+      grid-template-columns: minmax(220px, 270px) 300px minmax(220px, 270px);
+      grid-template-rows: auto auto auto auto; justify-content: center; column-gap: clamp(36px, 6vw, 90px); row-gap: 0;
+    }
+    .drop { grid-column: 2; grid-row: 1 / span 2; width: 100%; margin: 0; }
+    .slot.tl { grid-column: 1; grid-row: 1; align-self: end; margin-bottom: 18px; }
+    .slot.bl { grid-column: 1; grid-row: 2; align-self: start; margin-top: 18px; }
+    .slot.tr { grid-column: 3; grid-row: 1; align-self: end; margin-bottom: 18px; }
+    .slot.br { grid-column: 3; grid-row: 2; align-self: start; margin-top: 18px; }
+    .slot.bc { grid-column: 2; grid-row: 3; margin-top: 18px; }
+    .hint { grid-row: 4; margin-top: 18px; }
+    .plate { font-size: var(--t-body); }
+  }
+</style>

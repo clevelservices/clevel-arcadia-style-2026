@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import OrbNet from '../components/OrbNet.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { about, home } from '../data/pages';
+import { routes, type Lang } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = about[lang];
+---
+<Base lang={lang} title={c.title} description={c.description} path={routes.about[lang]} alt={routes.about[lang === 'tr' ? 'en' : 'tr']} active="about">
+  <section class="a-hero">
+    <div class="wrap a-hero-grid">
+      <div class="a-text">
+        <h1>{c.h1}</h1>
+        <p class="lead">{c.lead}</p>
+      </div>
+      <OrbNet center={c.teamTitle} nodes={c.disciplines.map((d) => d.t)} tone="s3" />
+    </div>
+  </section>
+
+  <section class="band band--white">
+    <div class="wrap">
+      <div class="head">
+        <h2>{c.teamTitle}</h2>
+        <p class="muted">{c.teamBody}</p>
+      </div>
+      <ul class="disc">
+        {c.disciplines.map((d) => (<li><h3>{d.t}</h3><p class="muted small">{d.d}</p></li>))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap vm">
+      <div class="card vm-card"><h2>{c.visionTitle}</h2><p class="lead">{c.vision}</p></div>
+      <div class="card vm-card"><h2>{c.missionTitle}</h2><p class="lead">{c.mission}</p></div>
+    </div>
+  </section>
+
+  <section class="band band--white">
+    <div class="wrap">
+      <div class="head"><h2>{c.principlesTitle}</h2></div>
+      <dl class="pr">
+        {c.principles.map((p) => (<div><dt>{p.t}</dt><dd class="muted">{p.d}</dd></div>))}
+      </dl>
+    </div>
+  </section>
+
+  <CtaBand lang={lang} title={home[lang].ctaTitle} body={home[lang].ctaBody} />
+</Base>
+
+<style>
+  .a-hero { background: var(--wash); padding: clamp(48px, 7vw, 96px) 0; }
+  .a-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+  .a-text { display: grid; gap: 22px; }
+  .a-text h1 { font-size: clamp(2.3rem, 1.4rem + 3vw, 3.5rem); max-width: 15ch; }
+  @media (max-width: 860px) { .a-hero-grid { grid-template-columns: 1fr; } }
+  .disc { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--sage-pale); }
+  .disc li { padding: 22px 22px 22px 0; border-bottom: 1px solid var(--sage-pale); display: grid; gap: 6px; }
+  @media (max-width: 760px) { .disc { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 460px) { .disc { grid-template-columns: 1fr; } }
+  .vm { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .vm-card { padding: clamp(24px, 4vw, 44px); display: grid; gap: 14px; align-content: start; }
+  .vm-card h2 { font-size: var(--t-h3); }
+  @media (max-width: 760px) { .vm { grid-template-columns: 1fr; } }
+  .pr { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 28px 48px; }
+  .pr dt { font-size: var(--t-sub); font-weight: 500; }
+  .pr dd { margin: 6px 0 0; }
+  @media (max-width: 760px) { .pr { grid-template-columns: 1fr; } }
+</style>

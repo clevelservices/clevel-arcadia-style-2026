@@ -1,0 +1,55 @@
+---
+import Base from '../layouts/Base.astro';
+import { contact } from '../data/pages';
+import { ui, routes, CALENDAR_URL, EMAIL, SOCIAL, type Lang } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = contact[lang];
+const t = ui[lang];
+const socials = [
+  SOCIAL.linkedin && { n: 'LinkedIn', u: SOCIAL.linkedin },
+  SOCIAL.instagram && { n: 'Instagram', u: SOCIAL.instagram },
+].filter(Boolean) as { n: string; u: string }[];
+---
+<Base lang={lang} title={c.title} description={c.description} path={routes.contact[lang]} alt={routes.contact[lang === 'tr' ? 'en' : 'tr']} active="contact">
+  <section class="c-hero">
+    <div class="wrap head head--center">
+      <h1>{c.h1}</h1>
+      <p class="lead">{c.lead}</p>
+    </div>
+    <div class="wrap ways">
+      <div class="card way">
+        <h2>{c.emailTitle}</h2>
+        <p class="muted">{c.emailBody}</p>
+        <a class="mail" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+      </div>
+      <div class="card way">
+        <h2>{c.callTitle}</h2>
+        <p class="muted">{c.callBody}</p>
+        <div><a class="btn" href={CALENDAR_URL} target="_blank" rel="noopener">{t.bookCall}</a></div>
+      </div>
+      {socials.length > 0 && (
+        <div class="card way">
+          <h2>{c.socialTitle}</h2>
+          <div class="btn-row">{socials.map((s) => <a class="btn btn--ghost" href={s.u} target="_blank" rel="noopener">{s.n}</a>)}</div>
+        </div>
+      )}
+    </div>
+  </section>
+  <section class="band band--white">
+    <div class="wrap prep">
+      <h2>{c.prepTitle}</h2>
+      <ol>{c.prep.map((p) => <li>{p}</li>)}</ol>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .c-hero { background: var(--wash); padding: clamp(48px, 7vw, 96px) 0; }
+  .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+  .way { padding: clamp(24px, 4vw, 40px); display: grid; gap: 14px; align-content: start; }
+  .way h2 { font-size: var(--t-h3); }
+  .mail { font-size: var(--t-h3); font-weight: 300; color: var(--canopy); word-break: break-word; }
+  .prep { display: grid; gap: 22px; max-width: 64ch; }
+  .prep ol { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; font-size: var(--t-sub); color: var(--slate); }
+</style>

@@ -1,0 +1,150 @@
+---
+import type { Lang } from '../../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const tr = lang === 'tr';
+const items = [
+  { t: tr ? 'Şirket araçlarının yakıtı' : 'Fuel for company vehicles', s: 1 },
+  { t: tr ? 'Satın alınan elektrik' : 'Purchased electricity', s: 2 },
+  { t: tr ? 'Tedarikçiden gelen hammadde' : 'Raw materials from suppliers', s: 3 },
+  { t: tr ? 'Fabrikadaki doğalgaz kazanı' : 'Natural gas boiler at the plant', s: 1 },
+  { t: tr ? 'Çalışanların iş seyahatleri' : 'Staff business travel', s: 3 },
+  { t: tr ? 'Satın alınan buhar ya da ısı' : 'Purchased steam or heat', s: 2 },
+  { t: tr ? 'Klimalardan soğutucu gaz kaçağı' : 'Refrigerant leaks from air conditioning', s: 1 },
+  { t: tr ? 'Ürünlerin müşteriye taşınması' : 'Shipping products to customers', s: 3 },
+];
+const bins = tr
+  ? [
+      { n: 1, t: 'Kapsam 1', g: 'Bu kaynak Kapsam 1’e girer.', d: 'Doğrudan: kendi tesisleriniz ve araçlarınız' },
+      { n: 2, t: 'Kapsam 2', g: 'Bu kaynak Kapsam 2’ye girer.', d: 'Satın aldığınız enerji' },
+      { n: 3, t: 'Kapsam 3', g: 'Bu kaynak Kapsam 3’e girer.', d: 'Değer zincirindeki diğer her şey' },
+    ]
+  : [
+      { n: 1, t: 'Scope 1', g: 'This source belongs in Scope 1.', d: 'Direct: your own sites and vehicles' },
+      { n: 2, t: 'Scope 2', g: 'This source belongs in Scope 2.', d: 'Energy you buy' },
+      { n: 3, t: 'Scope 3', g: 'This source belongs in Scope 3.', d: 'Everything else in your value chain' },
+    ];
+const L = tr
+  ? { placed: 'doğru yerleşti', wrong: 'Bu kaynak', goes: 'kapsamına girer.', try: 'Tekrar deneyin.', done: 'Hepsi yerinde.', mistakes: 'hata', restart: 'Yeniden oyna', pick: 'Seçildi. Şimdi bir kutuya dokunun.' }
+  : { placed: 'placed correctly', wrong: 'This source belongs in', goes: '.', try: 'Try again.', done: 'All sorted.', mistakes: 'mistakes', restart: 'Play again', pick: 'Selected. Now tap a box.' };
+---
+<div class="ss" data-ss data-l={JSON.stringify(L)}>
+  <ul class="pool" data-pool>
+    {items.map((it, i) => (
+      <li><button type="button" class="token" data-token data-s={it.s} data-i={i}>{it.t}</button></li>
+    ))}
+  </ul>
+  <div class="bins">
+    {bins.map((b) => (
+      <button type="button" class="bin" data-bin={b.n} data-goes={b.g}>
+        <span class="bin-t">{b.t}</span>
+        <span class="bin-d">{b.d}</span>
+        <span class="bin-items" data-items></span>
+      </button>
+    ))}
+  </div>
+  <div class="ss-foot">
+    <p class="ss-msg" aria-live="polite" data-msg></p>
+    <p class="ss-score"><strong data-score>0</strong> / {items.length} {L.placed}</p>
+    <button type="button" class="btn btn--ghost" data-reset hidden>{L.restart}</button>
+  </div>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-ss]');
+  if (root) {
+    const L = JSON.parse(root.dataset.l || '{}');
+    const tokens = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-token]'));
+    const bins = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-bin]'));
+    const msg = root.querySelector<HTMLElement>('[data-msg]')!;
+    const scoreEl = root.querySelector<HTMLElement>('[data-score]')!;
+    const reset = root.querySelector<HTMLButtonElement>('[data-reset]')!;
+    let selected: HTMLButtonElement | null = null, score = 0, mistakes = 0;
+
+    const select = (t: HTMLButtonElement | null) => {
+      tokens.forEach((x) => x.classList.toggle('is-selected', x === t));
+      selected = t;
+      if (t) msg.textContent = L.pick;
+    };
+    const place = (t: HTMLButtonElement, bin: HTMLButtonElement) => {
+      const want = Number(t.dataset.s), got = Number(bin.dataset.bin);
+      if (want === got) {
+        const chip = document.createElement('span'); chip.className = 'placed'; chip.textContent = t.textContent;
+        bin.querySelector('[data-items]')!.appendChild(chip);
+        t.parentElement!.hidden = true; score++;
+        msg.textContent = '';
+        bin.classList.add('ok'); setTimeout(() => bin.classList.remove('ok'), 450);
+      } else {
+        mistakes++;
+        msg.textContent = `${bins[want - 1].dataset.goes} ${L.try}`;
+        bin.classList.add('no'); setTimeout(() => bin.classList.remove('no'), 450);
+      }
+      select(null);
+      scoreEl.textContent = String(score);
+      if (score === tokens.length) { msg.textContent = `${L.done} ${mistakes} ${L.mistakes}.`; reset.hidden = false; }
+    };
+
+    tokens.forEach((t) => {
+      t.addEventListener('click', () => { if (t.dataset.dragged) { delete t.dataset.dragged; return; } select(selected === t ? null : t); });
+      let sx = 0, sy = 0, pid = -1, dragging = false;
+      t.addEventListener('pointerdown', (e) => { if (e.button !== 0) return; sx = e.clientX; sy = e.clientY; pid = e.pointerId; dragging = false; });
+      t.addEventListener('pointermove', (e) => {
+        if (e.pointerId !== pid) return;
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        if (!dragging && Math.hypot(dx, dy) > 8) { dragging = true; t.setPointerCapture(pid); t.classList.add('is-dragging'); }
+        if (dragging) {
+          e.preventDefault(); t.style.transform = `translate(${dx}px, ${dy}px)`;
+          bins.forEach((b) => { const r = b.getBoundingClientRect(); b.classList.toggle('over', e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom); });
+        }
+      });
+      const end = (e: PointerEvent) => {
+        if (e.pointerId !== pid) return; pid = -1;
+        if (!dragging) return;
+        t.dataset.dragged = '1'; dragging = false;
+        t.classList.remove('is-dragging'); t.style.transform = '';
+        const target = bins.find((b) => b.classList.contains('over'));
+        bins.forEach((b) => b.classList.remove('over'));
+        if (target) place(t, target);
+      };
+      t.addEventListener('pointerup', end);
+      t.addEventListener('pointercancel', () => { pid = -1; dragging = false; t.classList.remove('is-dragging'); t.style.transform = ''; bins.forEach((b) => b.classList.remove('over')); });
+    });
+    bins.forEach((b) => b.addEventListener('click', () => { if (selected) place(selected, b); }));
+    reset.addEventListener('click', () => {
+      tokens.forEach((t) => (t.parentElement!.hidden = false));
+      bins.forEach((b) => (b.querySelector('[data-items]')!.innerHTML = ''));
+      score = 0; mistakes = 0; scoreEl.textContent = '0'; msg.textContent = ''; reset.hidden = true; select(null);
+    });
+  }
+</script>
+
+<style>
+  .ss { display: grid; gap: 22px; }
+  .pool { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; min-height: 48px; }
+  .token {
+    min-height: 44px; padding: 0 16px; border-radius: 999px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+    background: var(--sheet); border: 1px solid var(--sage); color: var(--bark); font: 400 var(--t-small) var(--font);
+    transition: border-color .15s var(--ease), background .15s var(--ease);
+  }
+  .token:hover { border-color: var(--canopy); }
+  .token:global(.is-selected) { background: var(--canopy); color: #fff; border-color: var(--canopy); }
+  .token:global(.is-dragging) { position: relative; z-index: 5; cursor: grabbing; border-color: var(--canopy); }
+  .bins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .bin {
+    display: grid; align-content: start; gap: 6px; min-height: 200px; padding: 18px; text-align: left; cursor: pointer;
+    background: var(--cream); border: 1.5px dashed var(--sage); border-radius: var(--r-card); font: inherit; color: inherit;
+    transition: border-color .15s var(--ease), background .15s var(--ease);
+  }
+  .bin:hover, .bin:global(.over) { border-color: var(--s5); border-style: solid; background: #eef5ea; }
+  .bin:global(.ok) { background: var(--mint-soft); border-color: var(--mint); border-style: solid; }
+  .bin:global(.no) { background: #f7e6e1; border-color: #c0634f; border-style: solid; }
+  .bin-t { font-size: var(--t-h3); font-weight: 300; letter-spacing: -0.02em; }
+  .bin-d { font-size: var(--t-cap); color: var(--slate); }
+  .bin-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .bin-items :global(.placed) { padding: 6px 10px; border-radius: 999px; background: var(--s5); color: #fff; font-size: var(--t-cap); }
+  .ss-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+  .ss-msg { flex: 1 1 280px; min-height: 1.5em; color: var(--slate); }
+  .ss-score { color: var(--slate); }
+  .ss-score strong { color: var(--bark); font-weight: 500; font-size: var(--t-sub); }
+  @media (max-width: 720px) { .bins { grid-template-columns: 1fr; } .bin { min-height: 120px; } }
+</style>

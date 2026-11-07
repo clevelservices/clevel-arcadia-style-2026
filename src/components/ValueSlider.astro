@@ -1,0 +1,97 @@
+---
+/**
+ * The blue→green band: the same work, read from "done" (blue) to "alive" (green).
+ * Rows flip one by one as the slider moves; the band's colour follows the slider.
+ */
+interface Props {
+  title: string; hint: string; label: string; from: string; to: string;
+  rows: { a: string; b: string }[]; end: string;
+}
+const { title, hint, label, from, to, rows, end } = Astro.props;
+---
+<section class="vs on-dark" data-vs style="--v:0">
+  <div class="wrap vs-inner">
+    <div class="vs-head">
+      <h2>{title}</h2>
+      <p class="vs-hint">{hint}</p>
+    </div>
+    <ol class="vs-rows" aria-live="polite">
+      {rows.map((r, i) => (
+        <li data-row data-at={(i + 1) / (rows.length + 1)}>
+          <span class="mark" aria-hidden="true"></span>
+          <span class="txt">
+            <span class="a">{r.a}</span>
+            <span class="b">{r.b}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+    <div class="vs-control">
+      <span class="end end--from">{from}</span>
+      <input type="range" min="0" max="100" value="0" step="1" aria-label={label} aria-valuetext={from} data-range />
+      <span class="end end--to">{to}</span>
+    </div>
+    <p class="vs-end" data-end>{end}</p>
+  </div>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-vs]');
+  if (root) {
+    const range = root.querySelector<HTMLInputElement>('[data-range]')!;
+    const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-row]'));
+    const from = root.querySelector('.end--from')!.textContent || '';
+    const to = root.querySelector('.end--to')!.textContent || '';
+    // Darkened stops of the client's blue→green image so white text stays readable.
+    const stops = [[58, 106, 140], [54, 107, 120], [52, 105, 94], [57, 104, 68], [52, 104, 44]];
+    const mix = (v: number) => {
+      const p = v * (stops.length - 1), i = Math.min(Math.floor(p), stops.length - 2), f = p - i;
+      return stops[i].map((c, k) => Math.round(c + (stops[i + 1][k] - c) * f));
+    };
+    const update = () => {
+      const v = Number(range.value) / 100;
+      const [r, g, b] = mix(v);
+      root.style.setProperty('--v', String(v));
+      root.style.setProperty('--bg', `rgb(${r} ${g} ${b})`);
+      rows.forEach((row) => row.classList.toggle('is-on', v >= Number(row.dataset.at) - 0.001));
+      root.classList.toggle('is-done', v >= 0.95);
+      range.setAttribute('aria-valuetext', v >= 0.5 ? to : from);
+    };
+    range.addEventListener('input', update);
+    root.querySelector('.end--from')!.addEventListener('click', () => { range.value = '0'; update(); });
+    root.querySelector('.end--to')!.addEventListener('click', () => { range.value = '100'; update(); });
+    update();
+  }
+</script>
+
+<style>
+  .vs { --bg: rgb(58 106 140); background: var(--bg); color: #fff; padding: clamp(72px, 10vw, 128px) 0; transition: background .15s linear; }
+  .vs-inner { display: grid; gap: clamp(32px, 5vw, 56px); }
+  .vs-head { display: grid; gap: 10px; }
+  .vs-head h2 { font-size: clamp(2.2rem, 1.4rem + 3vw, 3.6rem); line-height: 1.05; }
+  .vs-hint { color: rgba(255, 255, 255, .75); }
+  .vs-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .vs-rows li { display: grid; grid-template-columns: 28px 1fr; gap: 18px; align-items: center; padding: 14px 0; border-top: 1px solid rgba(255, 255, 255, .18); }
+  .vs-rows li:last-child { border-bottom: 1px solid rgba(255, 255, 255, .18); }
+  .mark { width: 22px; height: 24px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: rgba(255, 255, 255, .35); transition: background .25s var(--ease); }
+  .txt { display: grid; font-size: clamp(1.25rem, .9rem + 1.4vw, 1.9rem); font-weight: 300; letter-spacing: -0.01em; line-height: 1.2; }
+  .txt span { grid-area: 1 / 1; transition: opacity .3s var(--ease), transform .3s var(--ease); }
+  .txt .b { opacity: 0; transform: translateY(6px); }
+  .vs-rows li:global(.is-on) .a { opacity: 0; transform: translateY(-6px); }
+  .vs-rows li:global(.is-on) .b { opacity: 1; transform: none; }
+  .vs-rows li:global(.is-on) .mark { background: var(--mint); }
+
+  .vs-control { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; }
+  .end { background: none; border: 0; color: #fff; font-weight: 500; cursor: pointer; font-size: var(--t-body); }
+  input[type='range'] { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; background: transparent; cursor: pointer; margin: 0; }
+  input[type='range']::-webkit-slider-runnable-track { height: 10px; border-radius: 10px; background: linear-gradient(90deg, #457ba0, #3f7c8c 30%, #3e7a6e 52%, #43794f 74%, #3f7a35); box-shadow: inset 0 0 0 1px rgba(255,255,255,.55); }
+  input[type='range']::-moz-range-track { height: 10px; border-radius: 10px; background: linear-gradient(90deg, #457ba0, #3f7c8c 30%, #3e7a6e 52%, #43794f 74%, #3f7a35); box-shadow: inset 0 0 0 1px rgba(255,255,255,.55); }
+  input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 34px; height: 34px; margin-top: -12px; border-radius: 50%; background: #fff; border: 0; }
+  input[type='range']::-moz-range-thumb { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 0; }
+  input[type='range']:focus-visible { outline: none; }
+  input[type='range']:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--mint); outline-offset: 2px; }
+  input[type='range']:focus-visible::-moz-range-thumb { outline: 3px solid var(--mint); outline-offset: 2px; }
+
+  .vs-end { font-size: var(--t-sub); max-width: 46ch; min-height: 3em; opacity: 0; transform: translateY(6px); transition: opacity .35s var(--ease), transform .35s var(--ease); }
+  :global(.vs.is-done) .vs-end { opacity: 1; transform: none; }
+</style>

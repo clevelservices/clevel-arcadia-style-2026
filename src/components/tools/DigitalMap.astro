@@ -1,0 +1,130 @@
+---
+import type { Lang } from '../../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const tr = lang === 'tr';
+const levels = tr ? ['Kâğıt', 'Excel', 'Ayrı sistemler', 'Entegre'] : ['Paper', 'Spreadsheets', 'Separate systems', 'Integrated'];
+const areas = [
+  {
+    id: 'prod', t: tr ? 'Üretim' : 'Production',
+    low: tr ? ['MES ile iş emri ve üretim takibi', 'Makinelerden veri toplama (IoT)'] : ['MES for work orders and production tracking', 'Collecting machine data (IoT)'],
+    mid: tr ? ['MES ve ERP entegrasyonu', 'SCADA ile anlık izleme'] : ['MES–ERP integration', 'Real-time monitoring with SCADA'],
+  },
+  {
+    id: 'qual', t: tr ? 'Kalite ve bakım' : 'Quality and maintenance',
+    low: tr ? ['Dijital kalite formları', 'Bakım planlama yazılımı'] : ['Digital quality forms', 'Maintenance planning software'],
+    mid: tr ? ['Makine görmesiyle kalite kontrol', 'Sensörlerle kestirimci bakım'] : ['Quality control with machine vision', 'Predictive maintenance with sensors'],
+  },
+  {
+    id: 'ware', t: tr ? 'Depo ve tedarik' : 'Warehouse and supply',
+    low: tr ? ['Barkod ya da RFID ile stok takibi', 'Depo yönetim sistemi (WMS)'] : ['Stock tracking with barcodes or RFID', 'Warehouse management system (WMS)'],
+    mid: tr ? ['Otonom mobil robotlar', 'Tedarikçi portalı'] : ['Autonomous mobile robots', 'Supplier portal'],
+  },
+  {
+    id: 'sales', t: tr ? 'Satış ve müşteri' : 'Sales and customers',
+    low: tr ? ['CRM', 'Web ya da mobil sipariş uygulaması'] : ['CRM', 'Web or mobile ordering app'],
+    mid: tr ? ['Bayi ve müşteri portalı', 'CRM ve ERP entegrasyonu'] : ['Dealer and customer portal', 'CRM–ERP integration'],
+  },
+  {
+    id: 'fin', t: tr ? 'Finans ve yönetim' : 'Finance and management',
+    low: tr ? ['ERP'] : ['ERP'],
+    mid: tr ? ['Yönetim panoları ve iş zekası'] : ['Management dashboards and business intelligence'],
+  },
+  {
+    id: 'sec', t: tr ? 'Siber güvenlik' : 'Cybersecurity',
+    low: tr ? ['Güvenlik duvarı, yedekleme ve erişim yönetimi'] : ['Firewall, backups and access management'],
+    mid: tr ? ['Üretim ağının ofis ağından ayrılması', 'Sızma testi'] : ['Separating production and office networks', 'Penetration testing'],
+  },
+];
+const L = tr
+  ? { pick: 'Haritayı doldurmak için alanlardan birinde bugünkü durumunuzu seçin.', first: 'Önce bunlar', then: 'Sonra bunlar', good: 'Bu alanlar iyi durumda', legend: 'Alan' }
+  : { pick: 'Pick where you are today in any area to start the map.', first: 'Start here', then: 'Then these', good: 'In good shape', legend: 'Area' };
+const C = 50, R = 40;
+const pt = (i: number, f: number) => { const a = ((-90 + i * 60) * Math.PI) / 180; return [C + R * f * Math.cos(a), C + R * f * Math.sin(a)]; };
+const ring = (f: number) => [0, 1, 2, 3, 4, 5].map((i) => pt(i, f).map((v) => v.toFixed(2)).join(',')).join(' ');
+---
+<div class="dm" data-dm data-areas={JSON.stringify(areas)} data-l={JSON.stringify(L)}>
+  <div class="dm-grid">
+    {areas.map((a) => (
+      <fieldset class="dm-area">
+        <legend>{a.t}</legend>
+        <div class="seg">
+          {levels.map((lv, i) => (
+            <label><input type="radio" name={`dm-${a.id}`} value={i + 1} /><span>{lv}</span></label>
+          ))}
+        </div>
+      </fieldset>
+    ))}
+  </div>
+  <div class="dm-side">
+    <svg viewBox="0 0 100 100" class="radar" aria-hidden="true">
+      {[0.25, 0.5, 0.75, 1].map((f) => <polygon points={ring(f)} class="ring" />)}
+      {[0, 1, 2, 3, 4, 5].map((i) => { const [x, y] = pt(i, 1); return <line x1={C} y1={C} x2={x} y2={y} class="spoke" />; })}
+      <polygon points={ring(0)} class="shape" data-shape />
+      {areas.map((a, i) => { const [x, y] = pt(i, 1.17); return <text x={x} y={y} text-anchor="middle" dominant-baseline="middle">{a.t.split(' ')[0]}</text>; })}
+    </svg>
+    <div class="dm-recs" aria-live="polite" data-recs><p class="muted">{L.pick}</p></div>
+  </div>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-dm]');
+  if (root) {
+    type Area = { id: string; t: string; low: string[]; mid: string[] };
+    const areas: Area[] = JSON.parse(root.dataset.areas || '[]');
+    const L = JSON.parse(root.dataset.l || '{}');
+    const shape = root.querySelector<SVGPolygonElement>('[data-shape]')!;
+    const recs = root.querySelector<HTMLElement>('[data-recs]')!;
+    const C = 50, R = 40;
+    const pt = (i: number, f: number) => { const a = ((-90 + i * 60) * Math.PI) / 180; return `${(C + R * f * Math.cos(a)).toFixed(2)},${(C + R * f * Math.sin(a)).toFixed(2)}`; };
+    const section = (title: string, items: string[]) => {
+      if (!items.length) return null;
+      const box = document.createElement('div'); box.className = 'rec';
+      const h = document.createElement('h4'); h.textContent = title; box.appendChild(h);
+      const ul = document.createElement('ul'); items.forEach((t) => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }); box.appendChild(ul);
+      return box;
+    };
+    const update = () => {
+      const vals = areas.map((a) => Number(root.querySelector<HTMLInputElement>(`input[name="dm-${a.id}"]:checked`)?.value || 0));
+      shape.setAttribute('points', vals.map((v, i) => pt(i, v / 4)).join(' '));
+      if (!vals.some(Boolean)) return;
+      const first: string[] = [], then: string[] = [], good: string[] = [];
+      areas.map((a, i) => ({ a, v: vals[i] })).filter((x) => x.v).sort((x, y) => x.v - y.v).forEach(({ a, v }) => {
+        if (v <= 2) first.push(...a.low.map((s) => `${a.t}: ${s}`));
+        else if (v === 3) then.push(...a.mid.map((s) => `${a.t}: ${s}`));
+        else good.push(a.t);
+      });
+      recs.innerHTML = '';
+      [section(L.first, first), section(L.then, then), section(L.good, good)].forEach((b) => b && recs.appendChild(b));
+    };
+    root.querySelectorAll('input').forEach((el) => el.addEventListener('change', update));
+    update();
+  }
+</script>
+
+<style>
+  .dm { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+  .dm-grid { display: grid; gap: 18px; }
+  .dm-area { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .dm-area legend { font-weight: 500; margin-bottom: 8px; padding: 0; }
+  .seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--sage); border-radius: var(--r-btn); overflow: hidden; background: var(--sheet); }
+  .seg label { position: relative; }
+  .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .seg span { display: grid; place-items: center; min-height: 44px; padding: 6px 6px; text-align: center; font-size: var(--t-cap); line-height: 1.2; border-left: 1px solid var(--sage-pale); cursor: pointer; }
+  .seg label:first-child span { border-left: 0; }
+  .seg label:hover span { background: var(--cream); }
+  .seg input:checked + span { background: var(--s1); color: #fff; }
+  .seg input:focus-visible + span { outline: 2px solid var(--s1); outline-offset: -3px; }
+  .dm-side { position: sticky; top: 100px; display: grid; gap: 18px; }
+  .radar { width: min(340px, 100%); justify-self: center; overflow: visible; }
+  .ring { fill: none; stroke: var(--sage-pale); stroke-width: .5; }
+  .ring:last-of-type { stroke: var(--sage); }
+  .spoke { stroke: var(--sage-pale); stroke-width: .4; }
+  .shape { fill: rgba(69, 123, 160, .28); stroke: var(--s1); stroke-width: 1; stroke-linejoin: round; transition: all .3s var(--ease); }
+  .radar text { font-size: 4.2px; fill: var(--slate); font-family: var(--font); }
+  .dm-recs { display: grid; gap: 14px; }
+  .dm-recs :global(.rec) { padding: 16px 18px; background: var(--cream); border-radius: 12px; }
+  .dm-recs :global(h4) { margin: 0 0 8px; font-weight: 500; font-size: var(--t-small); }
+  .dm-recs :global(ul) { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: var(--t-small); }
+  @media (max-width: 860px) { .dm { grid-template-columns: 1fr; } .dm-side { position: static; } }
+</style>

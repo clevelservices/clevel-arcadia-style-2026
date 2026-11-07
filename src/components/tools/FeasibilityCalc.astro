@@ -1,0 +1,133 @@
+---
+import type { Lang } from '../../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const L = lang === 'tr'
+  ? {
+      inv: 'Yatırım tutarı', cf: 'Yıllık net nakit girişi', inc: 'Teşvikin yatırıma etkisi', rate: 'İskonto oranı', years: 'Değerlendirme süresi',
+      incHelp: 'KDV istisnası, gümrük muafiyeti, hibe gibi kalemlerin yatırım tutarını ne kadar azalttığına dair tahmininiz.',
+      without: 'Teşviksiz', with: 'Teşvikli', payback: 'Geri ödeme', npv: 'Net bugünkü değer', yr: 'yıl', longer: 'süreden uzun', never: 'geri dönmüyor', unit: '',
+    }
+  : {
+      inv: 'Investment amount', cf: 'Annual net cash inflow', inc: 'Effect of incentives on the investment', rate: 'Discount rate', years: 'Evaluation period',
+      incHelp: 'Your estimate of how much items such as VAT exemption, customs exemption or grants reduce the investment.',
+      without: 'Without incentives', with: 'With incentives', payback: 'Payback', npv: 'Net present value', yr: 'yrs', longer: 'longer than the period', never: 'does not pay back', unit: '',
+    };
+---
+<div class="fz" data-fz data-lang={lang} data-l={JSON.stringify(L)}>
+  <div class="fz-inputs">
+    <label class="fz-field">
+      <span>{L.inv}</span>
+      <input type="text" inputmode="numeric" value="10000000" data-k="inv" />
+    </label>
+    <label class="fz-field">
+      <span>{L.cf}</span>
+      <input type="text" inputmode="numeric" value="2500000" data-k="cf" />
+    </label>
+    <label class="fz-field">
+      <span>{L.inc} <output data-o="inc">%20</output></span>
+      <input type="range" min="0" max="50" step="1" value="20" data-k="inc" />
+      <small class="muted">{L.incHelp}</small>
+    </label>
+    <div class="fz-two">
+      <label class="fz-field">
+        <span>{L.rate} <output data-o="rate">%25</output></span>
+        <input type="range" min="0" max="60" step="1" value="25" data-k="rate" />
+      </label>
+      <label class="fz-field">
+        <span>{L.years} <output data-o="years">10</output></span>
+        <input type="range" min="3" max="20" step="1" value="10" data-k="years" />
+      </label>
+    </div>
+  </div>
+
+  <div class="fz-out" aria-live="polite">
+    <div class="fz-row" data-row="without">
+      <div class="fz-row-head"><span class="sw sw--a"></span><strong>{L.without}</strong></div>
+      <div class="fz-track"><span class="fz-fill fz-fill--a" data-bar></span></div>
+      <dl>
+        <div><dt>{L.payback}</dt><dd data-pb></dd></div>
+        <div><dt>{L.npv}</dt><dd data-npv></dd></div>
+      </dl>
+    </div>
+    <div class="fz-row" data-row="with">
+      <div class="fz-row-head"><span class="sw sw--b"></span><strong>{L.with}</strong></div>
+      <div class="fz-track"><span class="fz-fill fz-fill--b" data-bar></span></div>
+      <dl>
+        <div><dt>{L.payback}</dt><dd data-pb></dd></div>
+        <div><dt>{L.npv}</dt><dd data-npv></dd></div>
+      </dl>
+    </div>
+    <div class="fz-axis" data-axis aria-hidden="true"></div>
+  </div>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-fz]');
+  if (root) {
+    const L = JSON.parse(root.dataset.l || '{}');
+    const loc = root.dataset.lang === 'tr' ? 'tr-TR' : 'en-GB';
+    const nf = new Intl.NumberFormat(loc, { maximumFractionDigits: 0 });
+    const df = new Intl.NumberFormat(loc, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+    const get = (k: string) => root.querySelector<HTMLInputElement>(`[data-k="${k}"]`)!;
+    const num = (el: HTMLInputElement) => Number(el.value.replace(/[^\d]/g, '')) || 0;
+    const fmtField = (el: HTMLInputElement) => { const n = num(el); el.value = n ? nf.format(n) : ''; };
+    ['inv', 'cf'].forEach((k) => { const el = get(k); fmtField(el); el.addEventListener('blur', () => fmtField(el)); });
+
+    const render = () => {
+      const I = num(get('inv')), CF = num(get('cf'));
+      const s = Number(get('inc').value) / 100, r = Number(get('rate').value) / 100, n = Number(get('years').value);
+      root.querySelector('[data-o="inc"]')!.textContent = `%${Math.round(s * 100)}`;
+      root.querySelector('[data-o="rate"]')!.textContent = `%${Math.round(r * 100)}`;
+      root.querySelector('[data-o="years"]')!.textContent = String(n);
+      const annuity = r === 0 ? n : (1 - Math.pow(1 + r, -n)) / r;
+      const calc = (inv: number) => ({ pb: CF > 0 ? inv / CF : Infinity, npv: -inv + CF * annuity });
+      const res = { without: calc(I), with: calc(I * (1 - s)) };
+      (['without', 'with'] as const).forEach((k) => {
+        const row = root.querySelector<HTMLElement>(`[data-row="${k}"]`)!;
+        const { pb, npv } = res[k];
+        row.querySelector<HTMLElement>('[data-bar]')!.style.width = `${Math.min(isFinite(pb) ? pb / n : 1, 1) * 100}%`;
+        row.querySelector('[data-pb]')!.textContent = !isFinite(pb) ? L.never : pb > n ? `${n} ${L.yr} ${L.longer}` : `${df.format(pb)} ${L.yr}`;
+        const npvEl = row.querySelector<HTMLElement>('[data-npv]')!;
+        npvEl.textContent = nf.format(Math.round(npv));
+        npvEl.classList.toggle('neg', npv < 0);
+      });
+      const axis = root.querySelector<HTMLElement>('[data-axis]')!;
+      axis.innerHTML = '';
+      const step = n <= 10 ? 1 : n <= 15 ? 3 : 5;
+      for (let y = 0; y <= n; y += step) { const t = document.createElement('span'); t.style.left = `${(y / n) * 100}%`; t.textContent = String(y); axis.appendChild(t); }
+    };
+    root.querySelectorAll('input').forEach((el) => el.addEventListener('input', render));
+    render();
+  }
+</script>
+
+<style>
+  .fz { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+  .fz-inputs { display: grid; gap: 22px; }
+  .fz-two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .fz-field { display: grid; gap: 8px; }
+  .fz-field > span { font-weight: 500; font-size: var(--t-small); display: flex; justify-content: space-between; gap: 8px; }
+  .fz-field output { color: var(--canopy); font-weight: 500; }
+  .fz-field small { font-size: var(--t-cap); line-height: 1.45; }
+  input[type='text'] { font: 400 var(--t-sub) var(--font); padding: 12px 14px; border: 1px solid var(--sage); border-radius: var(--r-input); background: var(--sheet); color: var(--bark); width: 100%; }
+  input[type='text']:focus { outline: 2px solid var(--s1); outline-offset: 1px; }
+  input[type='range'] { accent-color: var(--canopy); width: 100%; min-height: 32px; }
+  .fz-out { display: grid; gap: 26px; padding: clamp(20px, 3vw, 32px); background: var(--cream); border-radius: var(--r-card); }
+  .fz-row { display: grid; gap: 10px; }
+  .fz-row-head { display: flex; align-items: center; gap: 10px; }
+  .fz-row-head strong { font-weight: 500; }
+  .sw { width: 14px; height: 14px; border-radius: 50%; }
+  .sw--a { background: var(--s1); } .sw--b { background: var(--s5); }
+  .fz-track { height: 16px; border-radius: 8px; background: var(--sheet); overflow: hidden; border: 1px solid var(--sage-pale); }
+  .fz-fill { display: block; height: 100%; border-radius: 8px; transition: width .35s var(--ease); }
+  .fz-fill--a { background: var(--s1); } .fz-fill--b { background: var(--s5); }
+  dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  dt { font-size: var(--t-cap); color: var(--muted); }
+  dd { margin: 2px 0 0; font-size: var(--t-h3); font-weight: 500; letter-spacing: -0.01em; }
+  dd:global(.neg) { color: #a3402f; }
+  .fz-axis { position: relative; height: 18px; margin-top: -12px; font-size: var(--t-cap); color: var(--muted); }
+  .fz-axis :global(span) { position: absolute; transform: translateX(-50%); }
+  @media (max-width: 860px) { .fz { grid-template-columns: 1fr; } }
+  @media (max-width: 420px) { .fz-two { grid-template-columns: 1fr; } dd { font-size: var(--t-sub); } }
+</style>

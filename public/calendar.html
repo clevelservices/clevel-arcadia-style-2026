@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Rezervasyon Takvimi | CLEVEL</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header>
+    <h1>Rezervasyon Takvimi</h1>
+    <nav>
+      <a href="index.html">Ana Sayfa</a>
+      <a href="about.html">Hakkımızda</a>
+      <a href="contact.html">İletişim</a>
+      <a href="calendar.html">Takvim</a>
+    </nav>
+  </header>
+  <main>
+    <p>Lütfen rezervasyon yapmak istediğiniz tarihi seçin:</p>
+    <form action="https://formspree.io/f/xyznbwkq" method="POST">
+      <label for="name">Adınız:</label>
+      <input type="text" name="name" required>
+
+      <label for="email">E-posta:</label>
+      <input type="email" name="email" required>
+
+      <label for="date">Tarih:</label>
+      <input type="date" name="date" required>
+
+      <label for="message">Notunuz:</label>
+      <textarea name="message"></textarea>
+
+      <button type="submit">Rezervasyon Gönder</button>
+    </form>
+  </main>
+  <footer>
+    <p>&copy; 2025 CLEVEL</p>
+  </footer>
+</body>
+</html>

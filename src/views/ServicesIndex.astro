@@ -1,0 +1,59 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { nobr } from '../lib/text';
+import { servicesIndex, home } from '../data/pages';
+import { services, servicePath } from '../data/services';
+import { ui, routes, type Lang } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = servicesIndex[lang];
+const t = ui[lang];
+---
+<Base lang={lang} title={c.title} description={c.description} path={routes.services[lang]} alt={routes.services[lang === 'tr' ? 'en' : 'tr']} active="services">
+  <section class="i-hero">
+    <div class="wrap head">
+      <h1>{c.h1}</h1>
+      <p class="lead">{c.lead}</p>
+    </div>
+  </section>
+  <section class="band band--white">
+    <div class="wrap">
+      <ul class="i-list">
+        {services.map((s, i) => (
+          <li>
+            <a href={servicePath(s, lang)} class={`i-item ${i === 0 ? 'is-main' : ''}`}>
+              <span class={`orb ${s.tone}`} aria-hidden="true"></span>
+              <span class="i-title" set:html={nobr(s.title[lang])} />
+              <span class="i-short muted">{s.short[lang]}</span>
+              <span class="i-tool">{t.tryIt}: {s.toolTitle[lang]}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  <CtaBand lang={lang} title={home[lang].ctaTitle} body={home[lang].ctaBody} />
+</Base>
+
+<style>
+  .i-hero { background: var(--wash); padding: clamp(48px, 7vw, 96px) 0 clamp(24px, 3vw, 40px); }
+  .i-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .i-list li:first-child { grid-column: 1 / -1; }
+  .i-item { display: grid; gap: 10px; align-content: start; height: 100%; padding: clamp(24px, 3vw, 36px); background: var(--cream); border: 1px solid var(--sage-pale); border-radius: var(--r-card); color: var(--bark); text-decoration: none; transition: border-color .2s var(--ease); }
+  .i-item:hover { border-color: var(--canopy); }
+  .i-item.is-main { background: var(--canopy); border-color: var(--canopy); color: #fff; }
+  .i-item.is-main .i-short { color: #c9dbd5; }
+  .i-item.is-main .i-tool { color: var(--mint); }
+  .i-title { font-size: var(--t-h3); font-weight: 300; letter-spacing: -0.02em; line-height: 1.15; }
+  .is-main .i-title { font-size: var(--t-h2); }
+  .i-short { max-width: 52ch; }
+  .i-tool { font-size: var(--t-small); font-weight: 500; color: var(--canopy); margin-top: 6px; }
+  .orb { width: 34px; height: 34px; border-radius: 50%; }
+  .orb.s1 { background: radial-gradient(circle at 35% 30%, #9cc3df, var(--s1)); }
+  .orb.s2 { background: radial-gradient(circle at 35% 30%, #93c6cf, var(--s2)); }
+  .orb.s3 { background: radial-gradient(circle at 35% 30%, #94cbbb, var(--s3)); }
+  .orb.s4 { background: radial-gradient(circle at 35% 30%, #a3cfa9, var(--s4)); }
+  .orb.s5 { background: radial-gradient(circle at 35% 30%, #a9d39b, var(--s5)); }
+  @media (max-width: 720px) { .i-list { grid-template-columns: 1fr; } }
+</style>

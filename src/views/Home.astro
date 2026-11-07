@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+import HexStage from '../components/HexStage.astro';
+import OrbNet from '../components/OrbNet.astro';
+import SubChips from '../components/SubChips.astro';
+import ValueSlider from '../components/ValueSlider.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { home } from '../data/pages';
+import { services, servicePath } from '../data/services';
+import { ui, routes, CALENDAR_URL, type Lang } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = home[lang];
+const t = ui[lang];
+const other: Lang = lang === 'tr' ? 'en' : 'tr';
+---
+<Base lang={lang} title={c.title} description={c.description} path={routes.home[lang]} alt={routes.home[other]}>
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <h1>{c.h1.split(/(?<=\.)\s+/).map((part) => <span class="line">{part}</span>)}</h1>
+      <p class="lead">{c.lead}</p>
+      <div class="btn-row">
+        <a class="btn" href={routes.services[lang]}>{t.nav.services}</a>
+        <a class="btn btn--ghost" href={CALENDAR_URL} target="_blank" rel="noopener">{t.bookCall}</a>
+      </div>
+      <div class="card stage-card">
+        <HexStage lang={lang} hint={c.dragHint} drop={c.drop} />
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--white svc-intro">
+    <div class="wrap head head--center">
+      <h2>{c.servicesTitle}</h2>
+      <p class="muted">{c.servicesIntro}</p>
+    </div>
+  </section>
+
+  {services.map((s, i) => (
+    <section class={`band svc ${i % 2 ? 'band--white' : ''}`} id={s.id}>
+      <div class={`wrap svc-grid ${i % 2 ? 'flip' : ''}`}>
+        <OrbNet center={s.net.center[lang]} nodes={s.net.nodes.map((n) => n[lang])} tone={s.tone} class="svc-net" />
+        <div class="svc-text">
+          <h2>{s.title[lang]}</h2>
+          <p class="lead">{s.short[lang]}</p>
+          <SubChips subs={s.subs} lang={lang} id={`h-${s.id}`} />
+          <div class="btn-row">
+            <a class="btn" href={servicePath(s, lang)}>{t.details}</a>
+            <a class="btn btn--ghost" href={`${servicePath(s, lang)}#kendin-dene`}>{t.tryIt}: {s.toolTitle[lang]}</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <ValueSlider {...c.slider} />
+
+  <section class="band band--white team">
+    <div class="wrap team-grid">
+      <div class="team-text">
+        <h2>{c.teamTitle}</h2>
+        <p class="lead">{c.teamBody}</p>
+        <a class="btn btn--ghost" href={routes.about[lang]}>{t.nav.about}</a>
+      </div>
+      <OrbNet center={c.teamTitle} nodes={c.disciplines} tone="s3" />
+    </div>
+  </section>
+
+  <CtaBand lang={lang} title={c.ctaTitle} body={c.ctaBody} />
+</Base>
+
+<style>
+  .hero { background: var(--wash); padding: clamp(56px, 8vw, 104px) 0 clamp(56px, 7vw, 88px); }
+  .hero-inner { display: grid; justify-items: center; text-align: center; gap: 22px; }
+  .hero h1 { max-width: none; }
+  .hero h1 .line { display: block; }
+  .hero .lead { max-width: 52ch; }
+  .hero .btn-row { justify-content: center; }
+  .stage-card { width: min(100%, 1040px); margin-top: clamp(28px, 4vw, 48px); padding: clamp(22px, 4vw, 48px) clamp(14px, 3vw, 40px); text-align: left; }
+
+  .svc-intro { padding-bottom: 0; }
+  .svc-intro .head { margin-bottom: 0; }
+  .svc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
+  .svc-grid.flip > :first-child { order: 2; }
+  .svc-text { display: grid; gap: 20px; align-content: center; }
+  .svc-text h2 { max-width: 16ch; }
+  .svc-text .btn-row { margin-top: 6px; }
+  @media (max-width: 860px) {
+    .svc-grid { grid-template-columns: 1fr; }
+    .svc-grid.flip > :first-child { order: 0; }
+    .svc-grid :global(.svc-net) { max-width: 460px; justify-self: center; }
+  }
+
+  .team-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+  .team-text { display: grid; gap: 18px; justify-items: start; }
+  @media (max-width: 860px) { .team-grid { grid-template-columns: 1fr; } }
+</style>

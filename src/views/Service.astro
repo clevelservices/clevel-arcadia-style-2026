@@ -1,0 +1,111 @@
+---
+import Base from '../layouts/Base.astro';
+import OrbNet from '../components/OrbNet.astro';
+import CtaBand from '../components/CtaBand.astro';
+import FundingCheck from '../components/tools/FundingCheck.astro';
+import TurqualityMeter from '../components/tools/TurqualityMeter.astro';
+import FeasibilityCalc from '../components/tools/FeasibilityCalc.astro';
+import DigitalMap from '../components/tools/DigitalMap.astro';
+import ScopeSort from '../components/tools/ScopeSort.astro';
+import { nobr } from '../lib/text';
+import { services, servicePath, type Service } from '../data/services';
+import { home } from '../data/pages';
+import { ui, routes, CALENDAR_URL, type Lang } from '../i18n/ui';
+interface Props { lang: Lang; service: Service }
+const { lang, service: s } = Astro.props;
+const t = ui[lang];
+const other: Lang = lang === 'tr' ? 'en' : 'tr';
+const next = services[(services.findIndex((x) => x.id === s.id) + 1) % services.length];
+const subsTitle = lang === 'tr' ? 'Neler yapıyoruz?' : 'What we do';
+---
+<Base lang={lang} title={`${s.title[lang]} | C-Level Services`} description={s.short[lang]} path={servicePath(s, lang)} alt={servicePath(s, other)} active="services">
+  <section class="s-hero">
+    <div class="wrap s-hero-grid">
+      <div class="s-hero-text">
+        <a class="crumb" href={routes.services[lang]}>{t.nav.services}</a>
+        <h1 set:html={nobr(s.title[lang])} />
+        <p class="lead">{s.lead[lang]}</p>
+        <div class="btn-row">
+          <a class="btn" href="#kendin-dene">{t.tryIt}</a>
+          <a class="btn btn--ghost" href={CALENDAR_URL} target="_blank" rel="noopener">{t.bookCall}</a>
+        </div>
+      </div>
+      <OrbNet center={s.net.center[lang]} nodes={s.net.nodes.map((n) => n[lang])} tone={s.tone} />
+    </div>
+  </section>
+
+  <section class="band band--white">
+    <div class="wrap">
+      <div class="head"><h2>{subsTitle}</h2></div>
+      <ul class="subs">
+        {s.subs.map((x) => (
+          <li>
+            <span class={`orb ${s.tone}`} aria-hidden="true"></span>
+            <h3>{x.t[lang]}</h3>
+            <p class="muted">{x.d[lang]}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band tool-band" id="kendin-dene">
+    <div class="wrap">
+      <div class="head">
+        <h2>{s.toolTitle[lang]}</h2>
+        <p class="muted">{s.toolIntro[lang]}</p>
+      </div>
+      <div class="card tool">
+        {s.tool === 'funding' && <FundingCheck lang={lang} />}
+        {s.tool === 'turquality' && <TurqualityMeter lang={lang} />}
+        {s.tool === 'feasibility' && <FeasibilityCalc lang={lang} />}
+        {s.tool === 'digital' && <DigitalMap lang={lang} />}
+        {s.tool === 'scopes' && <ScopeSort lang={lang} />}
+      </div>
+      <p class="tool-note note">{s.toolNote[lang]}</p>
+    </div>
+  </section>
+
+  <section class="band--white next">
+    <div class="wrap">
+      <a class="next-link" href={servicePath(next, lang)}>
+        <span class={`orb orb--lg ${next.tone}`} aria-hidden="true"></span>
+        <span class="next-text">
+          <span class="small muted">{t.next}</span>
+          <span class="next-title" set:html={nobr(next.title[lang])} />
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <CtaBand lang={lang} title={home[lang].ctaTitle} body={home[lang].ctaBody} />
+</Base>
+
+<style>
+  .s-hero { background: var(--wash); padding: clamp(40px, 6vw, 88px) 0 clamp(48px, 7vw, 96px); }
+  .s-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+  .s-hero-text { display: grid; gap: 22px; justify-items: start; }
+  .s-hero-text h1 { font-size: clamp(2.3rem, 1.4rem + 3vw, 3.5rem); max-width: 15ch; }
+  .crumb { font-size: var(--t-small); color: var(--slate); text-decoration: none; }
+  .crumb:hover { color: var(--canopy); text-decoration: underline; }
+  @media (max-width: 860px) { .s-hero-grid { grid-template-columns: 1fr; } }
+
+  .subs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 28px 36px; }
+  .subs li { display: grid; gap: 8px; align-content: start; padding-top: 18px; border-top: 1px solid var(--sage-pale); }
+  .orb { width: 22px; height: 22px; border-radius: 50%; margin-bottom: 4px; }
+  .orb--lg { width: 56px; height: 56px; flex: none; margin: 0; }
+  .orb.s1 { background: radial-gradient(circle at 35% 30%, #9cc3df, var(--s1)); }
+  .orb.s2 { background: radial-gradient(circle at 35% 30%, #93c6cf, var(--s2)); }
+  .orb.s3 { background: radial-gradient(circle at 35% 30%, #94cbbb, var(--s3)); }
+  .orb.s4 { background: radial-gradient(circle at 35% 30%, #a3cfa9, var(--s4)); }
+  .orb.s5 { background: radial-gradient(circle at 35% 30%, #a9d39b, var(--s5)); }
+
+  .tool-band { scroll-margin-top: 70px; }
+  .note { margin-top: 18px; }
+
+  .next { border-top: 1px solid var(--sage-pale); }
+  .next-link { display: flex; align-items: center; gap: 22px; padding: 40px 0; text-decoration: none; color: var(--bark); }
+  .next-text { display: grid; gap: 4px; }
+  .next-title { font-size: var(--t-h2); font-weight: 300; letter-spacing: -0.02em; line-height: 1.1; }
+  .next-link:hover .next-title { color: var(--canopy); }
+</style>

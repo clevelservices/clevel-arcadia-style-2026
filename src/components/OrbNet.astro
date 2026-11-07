@@ -1,0 +1,79 @@
+---
+/**
+ * The site's one illustration system (Arcadia's orb network, recoloured):
+ * a dark centre orb, six orbs around it on dotted links, each with a white pill label.
+ * Orb colours run along the blue→green spectrum, with mint and pale sky as relief.
+ */
+import type { Tone } from '../data/services';
+interface Props {
+  center: string;
+  nodes: string[];
+  tone?: Tone;
+  class?: string;
+}
+const { center, nodes, tone = 's3', class: cls = '' } = Astro.props;
+const uid = Math.random().toString(36).slice(2, 7);
+const colors: Record<string, [string, string]> = {
+  s1: ['#9cc3df', '#457ba0'],
+  s2: ['#93c6cf', '#3f7c8c'],
+  s3: ['#94cbbb', '#3e7a6e'],
+  s4: ['#a3cfa9', '#43794f'],
+  s5: ['#a9d39b', '#3f7a35'],
+  mint: ['#c9fbe3', '#2ee59d'],
+  sky: ['#ffffff', '#c9d8e3'],
+};
+// Each network leans on its own tone, with two neighbours for variety.
+const order: Record<Tone, string[]> = {
+  s1: ['s1', 'mint', 's2', 'sky', 's1', 's3'],
+  s2: ['s2', 'sky', 's1', 'mint', 's2', 's3'],
+  s3: ['s3', 'mint', 's2', 'sky', 's3', 's4'],
+  s4: ['s4', 'sky', 's3', 'mint', 's4', 's5'],
+  s5: ['s5', 'mint', 's4', 'sky', 's5', 's3'],
+};
+const W = 100, H = 82, cx = 50, cy = 41;
+const angles = [-150, -90, -30, 30, 90, 150];
+const pts = nodes.slice(0, 6).map((label, i) => {
+  const a = (angles[i] * Math.PI) / 180;
+  const x = cx + 37 * Math.cos(a);
+  const y = cy + 29 * Math.sin(a);
+  const r = i % 3 === 1 ? 5.4 : i % 2 ? 6.4 : 7.2;
+  return { label, x, y, r, key: order[tone][i] };
+});
+const used = Array.from(new Set(pts.map((p) => p.key)));
+---
+<div class={`orbnet ${cls}`} aria-hidden="true">
+  <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+    <defs>
+      {used.map((k) => (
+        <radialGradient id={`o-${uid}-${k}`} cx="35%" cy="30%" r="75%">
+          <stop offset="0" stop-color={colors[k][0]} />
+          <stop offset="1" stop-color={colors[k][1]} />
+        </radialGradient>
+      ))}
+      <radialGradient id={`o-${uid}-c`} cx="35%" cy="30%" r="80%">
+        <stop offset="0" stop-color="#2b6b58" />
+        <stop offset="1" stop-color="#0b3329" />
+      </radialGradient>
+    </defs>
+    <ellipse cx={cx} cy={cy} rx="37" ry="29" fill="none" stroke="#afc4bf" stroke-width=".25" stroke-dasharray=".6 1.4" />
+    {pts.map((p) => <line x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#afc4bf" stroke-width=".35" stroke-dasharray=".8 1.2" />)}
+    {pts.map((p) => <circle cx={p.x} cy={p.y} r={p.r} fill={`url(#o-${uid}-${p.key})`} />)}
+    <circle cx={cx} cy={cy} r="11" fill={`url(#o-${uid}-c)`} />
+  </svg>
+  <span class="pill pill--center" style={`left:${cx}%;top:${(cy / H) * 100}%`}>{center}</span>
+  {pts.map((p) => (
+    <span class="pill" style={`left:${p.x}%;top:${((p.y + p.r + 3.6) / H) * 100}%`}>{p.label}</span>
+  ))}
+</div>
+
+<style>
+  .orbnet { position: relative; width: 100%; aspect-ratio: 100 / 82; container-type: inline-size; }
+  .orbnet svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .pill {
+    position: absolute; transform: translate(-50%, -50%);
+    padding: .35em .8em; border-radius: 999px; white-space: nowrap;
+    background: var(--sheet); border: 1px solid var(--sage-pale); color: var(--bark);
+    font-size: clamp(10px, 3.1cqi, 14px); font-weight: 500; line-height: 1.2;
+  }
+  .pill--center { background: transparent; border: 0; color: #fff; font-size: clamp(10px, 3.3cqi, 15px); max-width: 20cqi; white-space: normal; text-align: center; }
+</style>

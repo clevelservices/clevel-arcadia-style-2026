@@ -1,0 +1,201 @@
+---
+import '@fontsource/dm-sans/latin-300.css';
+import '@fontsource/dm-sans/latin-ext-300.css';
+import '@fontsource/dm-sans/latin-400.css';
+import '@fontsource/dm-sans/latin-ext-400.css';
+import '@fontsource/dm-sans/latin-500.css';
+import '@fontsource/dm-sans/latin-ext-500.css';
+import '../styles/global.css';
+import { ui, routes, SITE, SOCIAL, CALENDAR_URL, EMAIL, type Lang } from '../i18n/ui';
+import { services, servicePath } from '../data/services';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  path: string;
+  alt: string;
+  active?: 'services' | 'about' | 'contact';
+}
+const { lang, title, description, path, alt, active } = Astro.props;
+const t = ui[lang];
+const other: Lang = lang === 'tr' ? 'en' : 'tr';
+const trPath = lang === 'tr' ? path : alt;
+const enPath = lang === 'en' ? path : alt;
+const year = new Date().getFullYear();
+const allLabel = lang === 'tr' ? 'Tüm hizmetler' : 'All services';
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={SITE + path} />
+    <link rel="alternate" hreflang="tr" href={SITE + trPath} />
+    <link rel="alternate" hreflang="en" href={SITE + enPath} />
+    <link rel="alternate" hreflang="x-default" href={SITE + enPath} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={SITE + path} />
+    <meta property="og:locale" content={lang === 'tr' ? 'tr_TR' : 'en_GB'} />
+    <meta name="theme-color" content="#104336" />
+    <link rel="icon" type="image/png" href="/brand/mark.png" />
+    {lang === 'tr' && path === '/' && (
+      <script is:inline>
+        // First visit from a non-Turkish browser goes to English. A manual language choice always wins.
+        try {
+          var chosen = localStorage.getItem('clv-lang');
+          var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'tr';
+          if (!chosen && !/^tr/i.test(nav) && !/bot|crawl|spider/i.test(navigator.userAgent)) location.replace('/en/');
+        } catch (e) {}
+      </script>
+    )}
+  </head>
+  <body>
+    <a class="skip" href="#main">{t.skip}</a>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href={routes.home[lang]} aria-label="C-Level Services">
+          <img src="/brand/logo-black.svg" alt="c-level services" width="180" height="32" />
+        </a>
+        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span class="menu-open">{t.menu}</span><span class="menu-close">{t.close}</span>
+        </button>
+        <nav id="site-nav" class="site-nav" aria-label={t.menu}>
+          <ul class="nav-list">
+            <li class="has-sub">
+              <button class="sub-btn" type="button" aria-expanded="false" aria-controls="nav-services" aria-current={active === 'services' ? 'page' : undefined}>
+                {t.nav.services}<span class="caret" aria-hidden="true"></span>
+              </button>
+              <ul id="nav-services" class="sub">
+                {services.map((s) => (
+                  <li><a href={servicePath(s, lang)}><span class={`dot ${s.tone}`} aria-hidden="true"></span>{s.name[lang]}</a></li>
+                ))}
+                <li class="sub-all"><a href={routes.services[lang]}>{allLabel}</a></li>
+              </ul>
+            </li>
+            <li><a href={routes.about[lang]} aria-current={active === 'about' ? 'page' : undefined}>{t.nav.about}</a></li>
+            <li><a href={routes.contact[lang]} aria-current={active === 'contact' ? 'page' : undefined}>{t.nav.contact}</a></li>
+          </ul>
+          <div class="nav-tools">
+            <a class="lang" href={alt} hreflang={other} lang={other} data-lang={other}>{t.other}</a>
+            <a class="btn nav-cta" href={CALENDAR_URL} target="_blank" rel="noopener">{t.bookCall}</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main"><slot /></main>
+
+    <footer class="site-footer on-dark">
+      <div class="wrap footer-grid">
+        <div class="footer-brand">
+          <img src="/brand/logo-white.svg" alt="c-level services" width="210" height="38" />
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+        </div>
+        <ul class="footer-links">
+          {services.map((s) => <li><a href={servicePath(s, lang)}>{s.name[lang]}</a></li>)}
+        </ul>
+        <ul class="footer-links">
+          <li><a href={routes.about[lang]}>{t.nav.about}</a></li>
+          <li><a href={routes.contact[lang]}>{t.nav.contact}</a></li>
+          {SOCIAL.linkedin && <li><a href={SOCIAL.linkedin} target="_blank" rel="noopener">LinkedIn</a></li>}
+          {SOCIAL.instagram && <li><a href={SOCIAL.instagram} target="_blank" rel="noopener">Instagram</a></li>}
+          <li><a href={alt} hreflang={other} lang={other} data-lang={other}>{t.other}</a></li>
+        </ul>
+        <p class="legal">© {year} {t.footer.company} {t.footer.rights}<br />{t.footer.trademark}</p>
+      </div>
+    </footer>
+
+    <script is:inline>
+      (function () {
+        var body = document.body;
+        var btn = document.querySelector('.menu-btn');
+        if (btn) btn.addEventListener('click', function () {
+          var open = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', String(!open));
+          body.classList.toggle('nav-open', !open);
+        });
+        var sub = document.querySelector('.sub-btn');
+        var li = sub && sub.parentElement;
+        function setSub(open) { sub.setAttribute('aria-expanded', String(open)); li.classList.toggle('is-open', open); }
+        if (sub) {
+          sub.addEventListener('click', function (e) { e.stopPropagation(); setSub(sub.getAttribute('aria-expanded') !== 'true'); });
+          document.addEventListener('click', function (e) { if (!li.contains(e.target)) setSub(false); });
+          document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { setSub(false); } });
+        }
+        document.querySelectorAll('[data-lang]').forEach(function (a) {
+          a.addEventListener('click', function () { try { localStorage.setItem('clv-lang', a.getAttribute('data-lang')); } catch (e) {} });
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+  .site-header { position: sticky; top: 0; z-index: 30; background: var(--sheet); border-bottom: 1px solid var(--sage-pale); }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 70px; }
+  .brand img { width: 180px; height: auto; }
+  .site-nav { display: flex; align-items: center; gap: 28px; }
+  .nav-list { list-style: none; display: flex; align-items: center; gap: 26px; margin: 0; padding: 0; }
+  .nav-list > li > a, .sub-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 0;
+    font: 400 var(--t-small) var(--font); color: var(--bark); text-decoration: none;
+    background: none; border: 0; cursor: pointer; border-bottom: 1px solid transparent;
+  }
+  .nav-list > li > a:hover, .sub-btn:hover, .nav-list [aria-current='page'] { color: var(--canopy); border-bottom-color: var(--canopy); }
+  .caret { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .2s var(--ease); }
+  .has-sub { position: relative; }
+  .has-sub.is-open .caret { transform: rotate(-135deg) translateY(-1px); }
+  .sub {
+    position: absolute; top: calc(100% + 10px); left: -18px; min-width: 280px; list-style: none; margin: 0; padding: 8px;
+    background: var(--sheet); border: 1px solid var(--sage-pale); border-radius: 12px; display: none;
+  }
+  .has-sub.is-open .sub { display: grid; }
+  .sub a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: var(--bark); text-decoration: none; font-size: var(--t-small); }
+  .sub a:hover { background: var(--cream); }
+  .sub-all { border-top: 1px solid var(--sage-pale); margin-top: 6px; padding-top: 6px; }
+  .sub-all a { color: var(--canopy); font-weight: 500; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .dot.s1 { background: var(--s1); } .dot.s2 { background: var(--s2); } .dot.s3 { background: var(--s3); } .dot.s4 { background: var(--s4); } .dot.s5 { background: var(--s5); }
+  .nav-tools { display: flex; align-items: center; gap: 18px; }
+  .lang { color: var(--slate); text-decoration: none; font-size: var(--t-small); }
+  .lang:hover { color: var(--canopy); text-decoration: underline; }
+  .nav-cta { min-height: 42px; padding: 0 18px; }
+  .menu-btn, .menu-close { display: none; }
+
+  @media (max-width: 920px) {
+    .menu-btn {
+      display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; cursor: pointer;
+      background: var(--sheet); border: 1px solid var(--sage); border-radius: var(--r-btn); font: 500 var(--t-small) var(--font); color: var(--bark);
+    }
+    .site-nav {
+      display: none; position: fixed; inset: 70px 0 auto 0; max-height: calc(100vh - 70px); overflow: auto;
+      flex-direction: column; align-items: stretch; gap: 0; padding: 8px var(--gutter) 24px;
+      background: var(--sheet); border-bottom: 1px solid var(--sage-pale);
+    }
+    :global(body.nav-open) .site-nav { display: flex; }
+    :global(body.nav-open) .menu-open { display: none; }
+    :global(body.nav-open) .menu-close { display: inline; }
+    .nav-list { flex-direction: column; align-items: stretch; gap: 0; }
+    .nav-list > li > a, .sub-btn { width: 100%; justify-content: space-between; padding: 14px 0; font-size: var(--t-sub); border-bottom: 1px solid var(--sage-pale); }
+    .sub { position: static; display: grid; border: 0; padding: 4px 0 8px; min-width: 0; }
+    .caret { display: none; }
+    .nav-tools { justify-content: space-between; padding-top: 18px; }
+    .brand img { width: 150px; }
+  }
+
+  .site-footer { background: var(--canopy-2); color: #c9dbd5; padding: clamp(56px, 8vw, 96px) 0 40px; }
+  .footer-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 36px; }
+  .footer-brand { display: grid; gap: 18px; align-content: start; }
+  .footer-brand img { width: 210px; height: auto; }
+  .footer-brand a { color: #fff; }
+  .footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; align-content: start; }
+  .footer-links a { color: #e8f1ee; text-decoration: none; font-size: var(--t-small); }
+  .footer-links a:hover { color: var(--mint); text-decoration: underline; }
+  .legal { grid-column: 1 / -1; font-size: var(--t-cap); line-height: 1.6; color: #93ada5; border-top: 1px solid rgba(255,255,255,.12); padding-top: 24px; }
+  @media (max-width: 760px) { .footer-grid { grid-template-columns: 1fr 1fr; } .footer-brand { grid-column: 1 / -1; } }
+</style>

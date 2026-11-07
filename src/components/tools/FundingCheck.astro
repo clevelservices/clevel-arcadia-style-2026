@@ -1,0 +1,168 @@
+---
+import { questions, programmes, risks, blockers, verdicts, officialLinks } from '../../data/wizard';
+import { ui, CALENDAR_URL, EMAIL, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const L = lang === 'tr'
+  ? { q: 'Soru', back: 'Geri', restart: 'Baştan başla', result: 'Sonuç', meter: 'Kendin yap hazırlığı', prog: 'Bakmanız gereken program aileleri', risks: 'Kendiniz yaparsanız dikkat edin', noProg: 'Seçimlerinize uyan belirgin bir program ailesi çıkmadı; proje bir programa göre yeniden kurgulanmalı olabilir.', noRisks: 'Belirgin bir risk noktası görünmüyor.', links: 'Resmi kaynaklar', send: 'Özeti e-postayla gönder', subject: 'Kendin Yap Testi sonucum' }
+  : { q: 'Question', back: 'Back', restart: 'Start again', result: 'Result', meter: 'Do-it-yourself readiness', prog: 'Programme families to look at', risks: 'Watch out for these if you go it alone', noProg: 'No clear programme family matches; the project may need reshaping to fit one.', noRisks: 'No clear risk points.', links: 'Official sources', send: 'Email the summary', subject: 'My self-check result' };
+const pick = (x: any) => (typeof x === 'string' ? x : x[lang]);
+const data = {
+  questions: questions.map((q) => ({ id: q.id, options: q.options.map((o) => ({ id: o.id, points: o.points, flags: o.flags ?? [] })) })),
+  programmes: programmes.map((p) => ({ when: p.when, unless: p.unless ?? [], text: p.text[lang], why: p.why[lang] })),
+  risks: Object.fromEntries(Object.entries(risks).map(([k, v]) => [k, v[lang]])),
+  blockers,
+  verdicts: Object.fromEntries(Object.entries(verdicts).map(([k, v]) => [k, { title: v.title[lang], body: v.body[lang] }])),
+  L, email: EMAIL,
+};
+---
+<div class="fc" data-fc>
+  <div class="fc-bar" aria-hidden="true"><span data-bar></span></div>
+  <p class="fc-count" data-count aria-live="polite"></p>
+  <form data-form>
+    {questions.map((q, i) => (
+      <fieldset data-q={q.id} hidden={i !== 0}>
+        <legend>{q.title[lang]}</legend>
+        {q.help && <p class="fc-help">{q.help[lang]}</p>}
+        <div class="fc-opts">
+          {q.options.map((o) => (
+            <label class="fc-opt"><input type="radio" name={q.id} value={o.id} /><span>{o.label[lang]}</span></label>
+          ))}
+        </div>
+      </fieldset>
+    ))}
+    <button type="button" class="btn btn--ghost fc-back" data-back hidden>{L.back}</button>
+  </form>
+
+  <div class="fc-result" data-result hidden tabindex="-1">
+    <p class="small muted">{L.result}</p>
+    <h3 class="fc-v" data-v-title></h3>
+    <p class="fc-vb" data-v-body></p>
+    <div class="fc-meter-wrap" data-meter-wrap>
+      <p class="small">{L.meter}</p>
+      <div class="fc-meter" data-meter role="img"></div>
+    </div>
+    <div class="fc-cols">
+      <div><h4>{L.prog}</h4><ul class="fc-prog" data-programmes></ul></div>
+      <div><h4>{L.risks}</h4><ul class="fc-risks" data-risks></ul></div>
+    </div>
+    <div class="fc-links">
+      <h4>{L.links}</h4>
+      <ul>{officialLinks.map((l) => <li><a href={l.url} target="_blank" rel="noopener">{pick(l.name)}</a></li>)}</ul>
+    </div>
+    <div class="btn-row">
+      <a class="btn" data-mail href={`mailto:${EMAIL}`}>{L.send}</a>
+      <a class="btn btn--ghost" href={CALENDAR_URL} target="_blank" rel="noopener">{t.bookCall}</a>
+      <button type="button" class="btn btn--ghost" data-restart>{L.restart}</button>
+    </div>
+  </div>
+  <script type="application/json" data-fc-data set:html={JSON.stringify(data)} />
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-fc]');
+  if (root) {
+    type Opt = { id: string; points?: number; flags: string[] };
+    type Q = { id: string; options: Opt[] };
+    const data = JSON.parse(root.querySelector('[data-fc-data]')!.textContent || '{}');
+    const form = root.querySelector<HTMLFormElement>('[data-form]')!;
+    const sets = Array.from(root.querySelectorAll<HTMLFieldSetElement>('[data-q]'));
+    const back = root.querySelector<HTMLButtonElement>('[data-back]')!;
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const bar = root.querySelector<HTMLElement>('[data-bar]')!;
+    const result = root.querySelector<HTMLElement>('[data-result]')!;
+    const qs: Q[] = data.questions;
+    const answers: Record<string, string> = {};
+    let history: number[] = [];
+    let cur = 0;
+    const asked = (q: Q) => q.id !== 'uncertainty' || !answers.goal || answers.goal === 'rd';
+    const list = () => qs.filter(asked);
+    const show = (i: number, focus = true) => {
+      cur = i;
+      sets.forEach((f, j) => (f.hidden = j !== i));
+      const l = list(); const pos = l.findIndex((q) => q.id === qs[i].id) + 1;
+      count.textContent = `${data.L.q} ${pos} / ${l.length}`;
+      bar.style.width = `${((pos - 1) / l.length) * 100}%`;
+      back.hidden = history.length === 0;
+      if (focus) (sets[i].querySelector<HTMLInputElement>('input:checked') || sets[i].querySelector<HTMLInputElement>('input'))?.focus({ preventScroll: true });
+    };
+    const next = (from: number) => { for (let j = from + 1; j < qs.length; j++) if (asked(qs[j])) return j; return -1; };
+    form.addEventListener('change', (e) => {
+      const input = e.target as HTMLInputElement;
+      if (input.type !== 'radio') return;
+      answers[input.name] = input.value;
+      if (input.name === 'goal' && input.value !== 'rd') delete answers.uncertainty;
+      setTimeout(() => { const n = next(cur); if (n === -1) finish(); else { history.push(cur); show(n); } }, 220);
+    });
+    back.addEventListener('click', () => { if (history.length) show(history.pop()!); });
+    const li = (text: string, why?: string) => { const el = document.createElement('li'); el.textContent = text; if (why) { const s = document.createElement('span'); s.className = 'why'; s.textContent = why; el.appendChild(s); } return el; };
+    function finish() {
+      let pts = 0, max = 0; const flags = new Set<string>();
+      list().forEach((q) => {
+        const o = q.options.find((x) => x.id === answers[q.id]);
+        if (q.options.some((x) => typeof x.points === 'number')) { max += Math.max(...q.options.map((x) => x.points ?? 0)); pts += o?.points ?? 0; }
+        o?.flags.forEach((f) => flags.add(f));
+      });
+      const ratio = max ? pts / max : 0;
+      const key = data.blockers.some((b: string) => flags.has(b)) ? 'blocked' : ratio >= 0.75 ? 'ready' : ratio >= 0.4 ? 'partial' : 'hard';
+      const v = data.verdicts[key];
+      result.dataset.verdict = key;
+      result.querySelector('[data-v-title]')!.textContent = v.title;
+      result.querySelector('[data-v-body]')!.textContent = v.body;
+      const meter = result.querySelector<HTMLElement>('[data-meter]')!; meter.innerHTML = '';
+      const filled = Math.round(ratio * 10);
+      for (let k = 0; k < 10; k++) { const s = document.createElement('span'); if (k < filled) s.className = 'on'; meter.appendChild(s); }
+      meter.setAttribute('aria-label', `${filled}/10`);
+      const progs = data.programmes.filter((p: any) => p.when.every((f: string) => flags.has(f)) && !p.unless.some((f: string) => flags.has(f)));
+      const pl = result.querySelector<HTMLElement>('[data-programmes]')!; pl.innerHTML = '';
+      (progs.length ? progs : [{ text: data.L.noProg }]).forEach((p: any) => pl.appendChild(li(p.text, p.why)));
+      const rk = Object.keys(data.risks).filter((k) => flags.has(k) && ((k !== 'no_rd' && k !== 'vague_rd') || answers.goal === 'rd'));
+      const rl = result.querySelector<HTMLElement>('[data-risks]')!; rl.innerHTML = '';
+      (rk.length ? rk.map((k) => data.risks[k]) : [data.L.noRisks]).forEach((r: string) => rl.appendChild(li(r)));
+      const summary = [v.title, '', `${data.L.prog}:`, ...(progs.length ? progs.map((p: any) => `- ${p.text}`) : ['-']), '', `${data.L.risks}:`, ...(rk.length ? rk.map((k) => `- ${data.risks[k]}`) : ['-'])].join('\n');
+      result.querySelector<HTMLAnchorElement>('[data-mail]')!.href = `mailto:${data.email}?subject=${encodeURIComponent(data.L.subject)}&body=${encodeURIComponent(summary)}`;
+      form.hidden = true; count.hidden = true; bar.style.width = '100%'; result.hidden = false;
+      result.focus({ preventScroll: true });
+      result.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    }
+    root.querySelector('[data-restart]')!.addEventListener('click', () => {
+      form.reset(); Object.keys(answers).forEach((k) => delete answers[k]); history = [];
+      result.hidden = true; form.hidden = false; count.hidden = false; show(0);
+    });
+    show(0, false);
+  }
+</script>
+
+<style>
+  .fc { display: grid; gap: 16px; max-width: 780px; }
+  .fc-bar { height: 4px; border-radius: 4px; background: var(--sage-pale); overflow: hidden; }
+  .fc-bar span { display: block; height: 100%; width: 0; background: var(--spectrum); transition: width .3s var(--ease); }
+  .fc-count { font-size: var(--t-cap); color: var(--muted); }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { padding: 0; font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem); font-weight: 300; letter-spacing: -0.02em; line-height: 1.15; }
+  .fc-help { color: var(--slate); margin-top: 10px; max-width: 60ch; }
+  .fc-opts { display: grid; gap: 10px; margin-top: 20px; }
+  .fc-opt { display: flex; align-items: center; gap: 14px; padding: 15px 18px; min-height: 56px; cursor: pointer; background: var(--cream); border: 1px solid var(--sage-pale); border-radius: 12px; transition: border-color .15s var(--ease), background .15s var(--ease); }
+  .fc-opt:hover { border-color: var(--canopy); }
+  .fc-opt input { appearance: none; -webkit-appearance: none; margin: 0; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--sage); background: var(--sheet); flex: none; cursor: pointer; }
+  .fc-opt input:checked { border: 5px solid var(--canopy); }
+  .fc-opt:has(input:checked) { border-color: var(--canopy); background: var(--mint-soft); }
+  .fc-opt:has(input:focus-visible) { outline: 2px solid var(--s1); outline-offset: 2px; }
+  .fc-back { justify-self: start; margin-top: 12px; }
+  .fc-result { display: grid; gap: 20px; outline: none; scroll-margin-top: 96px; }
+  .fc-v { font-size: clamp(1.7rem, 1.2rem + 1.8vw, 2.4rem); font-weight: 300; letter-spacing: -0.02em; line-height: 1.12; }
+  .fc-vb { color: var(--slate); font-size: var(--t-sub); max-width: 60ch; }
+  .fc-meter { display: flex; gap: 5px; margin-top: 8px; }
+  .fc-meter :global(span) { width: 24px; height: 26px; background: var(--sage-pale); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+  .fc-meter :global(span.on) { background: var(--canopy); }
+  .fc-result[data-verdict='blocked'] .fc-meter-wrap { display: none; }
+  .fc-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding-top: 20px; border-top: 1px solid var(--sage-pale); }
+  h4 { margin: 0 0 12px; font-weight: 500; font-size: var(--t-body); }
+  .fc-prog, .fc-risks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .fc-prog :global(li) { display: grid; gap: 2px; padding-left: 16px; border-left: 2px solid var(--canopy); }
+  .fc-prog :global(.why) { color: var(--slate); font-size: var(--t-small); }
+  .fc-risks :global(li) { padding: 12px 14px; background: var(--cream); border-radius: 10px; font-size: var(--t-small); }
+  .fc-links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+  @media (max-width: 720px) { .fc-cols { grid-template-columns: 1fr; } }
+</style>
