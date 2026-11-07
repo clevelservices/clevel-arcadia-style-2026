@@ -18,6 +18,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   };
   if (!lead.name || !EMAIL_RE.test(lead.email) || b.consent !== true) return json({ error: 'invalid' }, 422);
 
+  // Retention promised in the privacy notice: stored requests are removed after one month.
+  await env.DB.prepare("DELETE FROM leads WHERE created_at < datetime('now', '-1 month')").run();
+
   const ipHash = await sha256(`clevel-self-check:${request.headers.get('cf-connecting-ip') || ''}`);
   const recent = await env.DB.prepare("SELECT COUNT(*) AS c FROM leads WHERE ip_hash = ? AND created_at > datetime('now', '-1 hour')").bind(ipHash).first<{ c: number }>();
   if ((recent?.c ?? 0) >= 5) return json({ error: 'too_many' }, 429);
