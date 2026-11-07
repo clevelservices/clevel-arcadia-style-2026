@@ -1,5 +1,5 @@
 import { services, servicePath } from '../data/services';
-import { routes, SITE, EMAIL, CALENDAR_URL, SOCIAL } from '../i18n/ui';
+import { routes, SITE, EMAILS, CALENDAR_URL, SOCIAL } from '../i18n/ui';
 
 /** Plain-text summary for AI assistants (llmstxt.org), generated from the same data as the pages. */
 export function GET() {
@@ -13,7 +13,7 @@ export function GET() {
 
 > C-Level Services is a Turkey-based advisory firm. Its core service is funding advisory: Turkish public grants (TÜBİTAK, KOSGEB, development agencies, ministry programmes), investment incentives and subsidised loans. It also advises on process and governance under Turquality, investment feasibility, digital transformation and green transition (carbon footprint, CBAM). Works in Turkish and English.
 
-İletişim / Contact: ${EMAIL} · ${CALENDAR_URL}${SOCIAL.linkedin ? ` · ${SOCIAL.linkedin}` : ''}
+İletişim / Contact: ${EMAILS.join(' · ')} · ${CALENDAR_URL}${SOCIAL.linkedin ? ` · ${SOCIAL.linkedin}` : ''}
 
 ## Hizmetler (Türkçe)
 ${SITE}${routes.services.tr}

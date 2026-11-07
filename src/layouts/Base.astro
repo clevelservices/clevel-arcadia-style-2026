@@ -6,7 +6,7 @@ import '@fontsource/dm-sans/latin-ext-400.css';
 import '@fontsource/dm-sans/latin-500.css';
 import '@fontsource/dm-sans/latin-ext-500.css';
 import '../styles/global.css';
-import { ui, routes, SITE, SOCIAL, CALENDAR_URL, EMAIL, type Lang } from '../i18n/ui';
+import { ui, routes, SITE, SOCIAL, CALENDAR_URL, EMAIL, EMAILS, type Lang } from '../i18n/ui';
 import { services, servicePath } from '../data/services';
 
 interface Props {
@@ -46,7 +46,7 @@ const org = {
   availableLanguage: ['tr', 'en'],
   knowsAbout: ['TÜBİTAK', 'KOSGEB', 'Yatırım Teşvik Belgesi', 'Turquality', 'Dijital Dönüşüm Destek Programı', 'SKDM / CBAM', 'Karbon ayak izi', 'Fizibilite raporu', 'Ar-Ge Merkezi', 'Tasarım Merkezi', 'Teknopark', 'TÜR Belgesi', 'Türk Eximbank', 'Kalkınma ajansları'],
   sameAs: [SOCIAL.linkedin, SOCIAL.instagram].filter(Boolean),
-  contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: EMAIL, availableLanguage: ['Turkish', 'English'], url: CALENDAR_URL },
+  contactPoint: EMAILS.map((m) => ({ '@type': 'ContactPoint', contactType: 'customer service', email: m, availableLanguage: ['Turkish', 'English'], url: CALENDAR_URL })),
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
     name: lang === 'tr' ? 'Hizmetler' : 'Services',
@@ -144,7 +144,7 @@ const graph = {
       <div class="wrap footer-grid">
         <div class="footer-brand">
           <img src="/brand/logo-white.svg" alt="c-level services" width="210" height="38" />
-          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+          <span class="footer-mails">{EMAILS.map((m) => <a href={`mailto:${m}`}>{m}</a>)}</span>
         </div>
         <ul class="footer-links">
           {services.map((s) => <li><a href={servicePath(s, lang)}>{s.name[lang]}</a></li>)}
@@ -245,6 +245,7 @@ const graph = {
   .footer-brand { display: grid; gap: 18px; align-content: start; }
   .footer-brand img { width: 210px; height: auto; }
   .footer-brand a { color: #fff; }
+  .footer-mails { display: grid; gap: 6px; justify-items: start; }
   .footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; align-content: start; }
   .footer-links a { color: #e8f1ee; text-decoration: none; font-size: var(--t-small); }
   .footer-links a:hover { color: var(--mint); text-decoration: underline; }

@@ -2,6 +2,9 @@ export type Lang = 'tr' | 'en';
 
 export const CALENDAR_URL = 'https://calendar.app.google/iWjKznNPnr4AqRHCA';
 export const EMAIL = 'info@clevel.services';
+/** Second address on the Turkish-friendly domain, shown next to the main one */
+export const EMAIL_ALT = 'info@cleveldanismanlik.com';
+export const EMAILS = [EMAIL, EMAIL_ALT];
 export const SITE = 'https://www.clevel.services';
 
 /** Fill in to show the links in the footer and on the contact page; empty values stay hidden. */
