@@ -18,8 +18,10 @@ interface Props {
   active?: 'services' | 'about' | 'contact';
   /** Extra schema.org objects for this page (Service, BreadcrumbList …) */
   schema?: object[];
+  /** Keep the page out of search results (404) */
+  noindex?: boolean;
 }
-const { lang, title, description, path, alt, active, schema = [] } = Astro.props;
+const { lang, title, description, path, alt, active, schema = [], noindex = false } = Astro.props;
 const t = ui[lang];
 const other: Lang = lang === 'tr' ? 'en' : 'tr';
 const trPath = lang === 'tr' ? path : alt;
@@ -86,7 +88,7 @@ const graph = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
     <link rel="alternate" type="text/plain" title="LLM summary" href="/llms.txt" />
     <script type="application/ld+json" set:html={JSON.stringify(graph)} />
     <meta name="theme-color" content="#104336" />

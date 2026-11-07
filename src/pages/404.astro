@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import { services, servicePath } from '../data/services';
+import { routes } from '../i18n/ui';
+---
+<Base lang="tr" title="Sayfa bulunamadı | C-Level Services" description="Aradığınız sayfa bulunamadı." path="/404/" alt="/404/" noindex>
+  <section class="band nf">
+    <div class="wrap nf-inner">
+      <p class="small muted">404</p>
+      <h1>Bu sayfa burada değil.</h1>
+      <p class="lead">Adres değişmiş olabilir. Aradığınız hizmete buradan ulaşabilirsiniz.</p>
+      <ul class="nf-links">
+        {services.map((s) => <li><a href={servicePath(s, 'tr')}>{s.title.tr}</a></li>)}
+      </ul>
+      <p class="muted"><span lang="en">Page not found.</span> <a href={routes.home.en} lang="en">Go to the English site</a></p>
+      <div class="btn-row"><a class="btn" href={routes.home.tr}>Ana sayfa</a></div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { padding: clamp(64px, 10vw, 128px) 0; }
+  .nf-inner { display: grid; gap: 20px; justify-items: start; max-width: 720px; }
+  .nf-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .nf-links a { color: var(--canopy); }
+</style>
