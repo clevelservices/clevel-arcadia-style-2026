@@ -1,6 +1,6 @@
 ---
 /**
- * Home signature: drag a service plate onto the hexagon (the logo mark) to open it.
+ * Home signature: drag a service plate onto the hexagon (the real logo mark on a canopy disc) to open it.
  * Plates are ordinary links, so click, tap and keyboard work without dragging.
  */
 import { services, servicePath } from '../data/services';
@@ -11,19 +11,17 @@ const pos = ['tl', 'bl', 'tr', 'br', 'bc'];
 ---
 <div class="stage" data-stage>
   <div class="drop" data-drop aria-hidden="true">
-    <svg viewBox="0 0 200 200">
+    <svg viewBox="0 0 300 300">
       <defs>
-        <linearGradient id="hexMetal" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#51504f" /><stop offset=".5" stop-color="#b9bbbe" /><stop offset="1" stop-color="#51504f" />
+        <linearGradient id="markMetal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#8c8b8a" /><stop offset=".5" stop-color="#e4e5e7" /><stop offset="1" stop-color="#8c8b8a" />
         </linearGradient>
-        <clipPath id="hexClip"><polygon points="100,8 180,54 180,146 100,192 20,146 20,54" /></clipPath>
       </defs>
-      <polygon class="drop-fill" points="100,8 180,54 180,146 100,192 20,146 20,54" />
-      <g clip-path="url(#hexClip)" class="drop-bands">
-        <path d="M58 200 L118 0 L146 0 L86 200 Z" />
-        <path d="M102 200 L162 0 L190 0 L130 200 Z" />
+      <circle class="drop-fill" cx="150" cy="150" r="148" />
+      <!-- The real logo mark (from brand/logo-color.svg), untouched, scaled to sit inside the disc. -->
+      <g class="drop-mark" transform="translate(150 150) scale(.66) translate(-150 -149.5)">
+        <path d="M64.3,132.1l78.8,136.5c1.2,2.2-0.3,5-2.9,5H83.6c-3.2,0-6.1-1.7-7.8-4.5L9.4,154c-1.6-2.7-1.6-6.2,0-8.9L26.8,115h0.1l21.5-37.2h-0.1l15.9-27.5c13.1-22.6,45.5-24,59.8-2.2c0.3,0.5,0.6,0.9,0.9,1.4l85.5,148c0.1,0.1,0.2,0.2,0.2,0.3c10.2,17.4,35.3,17.1,45.4-0.3l7.7-13.3c-11.6-0.6-22.1-6.9-27.9-17.1L157,30.5c-1.2-2.2,0.3-5,2.9-5h56.5c3.2,0,6.1,1.7,7.8,4.5l66.4,115c1.6,2.7,1.6,6.2,0,8.9l-7.7,13.3L243.8,235l-8.4,14.5c-13.1,22.6-45.7,23.6-59.5,1.4c-0.2-0.4-0.6-0.9-0.8-1.3l-85.5-148c-0.1-0.1-0.2-0.2-0.2-0.3c-10.2-17.3-35.3-17-45.3,0.3L36.3,115C48,115.6,58.5,122,64.3,132.1z" />
       </g>
-      <polygon points="100,8 180,54 180,146 100,192 20,146 20,54" fill="none" stroke="url(#hexMetal)" stroke-width="3" />
     </svg>
     <span class="drop-label">{drop}</span>
   </div>
@@ -85,15 +83,15 @@ const pos = ['tl', 'bl', 'tr', 'br', 'bc'];
   .drop { grid-column: 1 / -1; position: relative; width: min(230px, 62%); margin: 4px auto 10px; aspect-ratio: 1; transition: transform .3s var(--ease); }
   .drop svg { width: 100%; height: 100%; overflow: visible; }
   .drop-fill { fill: var(--canopy); transition: fill .25s var(--ease); }
-  .drop-bands path { fill: url(#hexMetal); transition: opacity .25s var(--ease); }
+  .drop-mark path { fill: url(#markMetal); transition: opacity .25s var(--ease), fill .25s var(--ease); }
   .drop-label { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 500; color: var(--bark); opacity: 0; transition: opacity .2s var(--ease); }
-  :global(.stage.is-active) .drop-bands path { opacity: .55; }
+  :global(.stage.is-active) .drop-mark path { opacity: .6; }
   .drop:global(.is-over) { transform: scale(1.05); }
   .drop:global(.is-over) .drop-fill { fill: var(--mint); }
-  .drop:global(.is-over) .drop-bands path { opacity: .15; }
+  .drop:global(.is-over) .drop-mark path { opacity: .12; }
   .drop:global(.is-over) .drop-label { opacity: 1; }
   .drop:global(.is-accepted) .drop-fill { fill: var(--mint); }
-  .drop:global(.is-accepted) .drop-bands path { opacity: 0; }
+  .drop:global(.is-accepted) .drop-mark path { opacity: 0; }
 
   .plates { display: contents; list-style: none; }
   .slot { list-style: none; }
