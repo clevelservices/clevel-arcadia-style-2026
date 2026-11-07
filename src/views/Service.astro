@@ -10,15 +10,38 @@ import ScopeSort from '../components/tools/ScopeSort.astro';
 import { nobr } from '../lib/text';
 import { services, servicePath, type Service } from '../data/services';
 import { home } from '../data/pages';
-import { ui, routes, CALENDAR_URL, type Lang } from '../i18n/ui';
+import { ui, routes, CALENDAR_URL, SITE, type Lang } from '../i18n/ui';
 interface Props { lang: Lang; service: Service }
 const { lang, service: s } = Astro.props;
 const t = ui[lang];
 const other: Lang = lang === 'tr' ? 'en' : 'tr';
 const next = services[(services.findIndex((x) => x.id === s.id) + 1) % services.length];
 const subsTitle = lang === 'tr' ? 'Neler yapıyoruz?' : 'What we do';
+const url = SITE + servicePath(s, lang);
+const schema = [
+  {
+    '@type': 'Service',
+    '@id': `${url}#service`,
+    name: s.title[lang],
+    serviceType: s.name[lang],
+    description: s.lead[lang],
+    url,
+    inLanguage: lang,
+    provider: { '@id': `${SITE}/#org` },
+    areaServed: [{ '@type': 'Country', name: 'Türkiye' }],
+    hasOfferCatalog: { '@type': 'OfferCatalog', name: s.title[lang], itemListElement: s.subs.map((x) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: x.t[lang], description: x.d[lang] } })) },
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'C-Level Services', item: SITE + routes.home[lang] },
+      { '@type': 'ListItem', position: 2, name: t.nav.services, item: SITE + routes.services[lang] },
+      { '@type': 'ListItem', position: 3, name: s.title[lang], item: url },
+    ],
+  },
+];
 ---
-<Base lang={lang} title={`${s.title[lang]} | C-Level Services`} description={s.short[lang]} path={servicePath(s, lang)} alt={servicePath(s, other)} active="services">
+<Base lang={lang} title={`${s.title[lang]} | C-Level Services`} description={s.short[lang]} path={servicePath(s, lang)} alt={servicePath(s, other)} active="services" schema={schema}>
   <section class="s-hero">
     <div class="wrap s-hero-grid">
       <div class="s-hero-text">

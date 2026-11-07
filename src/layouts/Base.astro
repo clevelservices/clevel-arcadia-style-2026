@@ -16,14 +16,50 @@ interface Props {
   path: string;
   alt: string;
   active?: 'services' | 'about' | 'contact';
+  /** Extra schema.org objects for this page (Service, BreadcrumbList …) */
+  schema?: object[];
 }
-const { lang, title, description, path, alt, active } = Astro.props;
+const { lang, title, description, path, alt, active, schema = [] } = Astro.props;
 const t = ui[lang];
 const other: Lang = lang === 'tr' ? 'en' : 'tr';
 const trPath = lang === 'tr' ? path : alt;
 const enPath = lang === 'en' ? path : alt;
 const year = new Date().getFullYear();
 const allLabel = lang === 'tr' ? 'Tüm hizmetler' : 'All services';
+const ogImage = `${SITE}/og-${lang}.jpg`;
+const org = {
+  '@type': 'ProfessionalService',
+  '@id': `${SITE}/#org`,
+  name: 'C-Level Services',
+  alternateName: ['Clevel Services', 'c-level services 155', 'C-Level Danışmanlık'],
+  legalName: 'Clevel Services Danışmanlık Anonim Şirketi',
+  url: SITE,
+  logo: `${SITE}/brand/mark.png`,
+  image: `${SITE}/og-tr.jpg`,
+  email: EMAIL,
+  description: lang === 'tr'
+    ? 'Kamu hibeleri, teşvikler ve sübvansiyonlu krediler başta olmak üzere kaynak geliştirme; Turquality kurumsallaşma, yatırım fizibilitesi, dijital dönüşüm ve yeşil dönüşüm danışmanlığı.'
+    : 'Funding advisory focused on Turkish public grants, incentives and subsidised loans, plus Turquality governance, investment feasibility, digital transformation and green transition advisory.',
+  areaServed: [{ '@type': 'Country', name: 'Türkiye' }, 'Worldwide'],
+  availableLanguage: ['tr', 'en'],
+  knowsAbout: ['TÜBİTAK', 'KOSGEB', 'Yatırım Teşvik Belgesi', 'Turquality', 'Dijital Dönüşüm Destek Programı', 'SKDM / CBAM', 'Karbon ayak izi', 'Fizibilite raporu', 'Ar-Ge Merkezi', 'Tasarım Merkezi', 'Teknopark', 'TÜR Belgesi', 'Türk Eximbank', 'Kalkınma ajansları'],
+  sameAs: [SOCIAL.linkedin, SOCIAL.instagram].filter(Boolean),
+  contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: EMAIL, availableLanguage: ['Turkish', 'English'], url: CALENDAR_URL },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: lang === 'tr' ? 'Hizmetler' : 'Services',
+    itemListElement: services.map((s) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: s.title[lang], url: SITE + servicePath(s, lang) } })),
+  },
+};
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    org,
+    { '@type': 'WebSite', '@id': `${SITE}/#site`, url: SITE, name: 'C-Level Services', inLanguage: ['tr', 'en'], publisher: { '@id': `${SITE}/#org` } },
+    { '@type': 'WebPage', url: SITE + path, name: title, description, inLanguage: lang, isPartOf: { '@id': `${SITE}/#site` }, about: { '@id': `${SITE}/#org` } },
+    ...schema,
+  ],
+};
 ---
 <!doctype html>
 <html lang={lang}>
@@ -41,6 +77,18 @@ const allLabel = lang === 'tr' ? 'Tüm hizmetler' : 'All services';
     <meta property="og:description" content={description} />
     <meta property="og:url" content={SITE + path} />
     <meta property="og:locale" content={lang === 'tr' ? 'tr_TR' : 'en_GB'} />
+    <meta property="og:locale:alternate" content={lang === 'tr' ? 'en_GB' : 'tr_TR'} />
+    <meta property="og:site_name" content="C-Level Services" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="alternate" type="text/plain" title="LLM summary" href="/llms.txt" />
+    <script type="application/ld+json" set:html={JSON.stringify(graph)} />
     <meta name="theme-color" content="#104336" />
     <link rel="icon" type="image/png" href="/brand/mark.png" />
     {lang === 'tr' && path === '/' && (

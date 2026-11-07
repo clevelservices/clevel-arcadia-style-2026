@@ -2,12 +2,14 @@ import { services, servicePath } from '../data/services';
 import { routes, SITE } from '../i18n/ui';
 
 export function GET() {
+  const lastmod = new Date().toISOString().slice(0, 10);
   const pairs: [string, string][] = [
     ...Object.values(routes).map((r) => [r.tr, r.en] as [string, string]),
     ...services.map((s) => [servicePath(s, 'tr'), servicePath(s, 'en')] as [string, string]),
   ];
   const urls = pairs.flatMap(([tr, en]) => [tr, en].map((loc) => `  <url>
     <loc>${SITE}${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
     <xhtml:link rel="alternate" hreflang="tr" href="${SITE}${tr}"/>
     <xhtml:link rel="alternate" hreflang="en" href="${SITE}${en}"/>
   </url>`));
