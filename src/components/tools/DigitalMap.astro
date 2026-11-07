@@ -7,36 +7,35 @@ const levels = tr ? ['Kâğıt', 'Excel', 'Ayrı sistemler', 'Entegre'] : ['Pape
 const areas = [
   {
     id: 'prod', t: tr ? 'Üretim' : 'Production',
-    low: tr ? ['MES ile iş emri ve üretim takibi', 'Makinelerden veri toplama (IoT)'] : ['MES for work orders and production tracking', 'Collecting machine data (IoT)'],
-    mid: tr ? ['MES ve ERP entegrasyonu', 'SCADA ile anlık izleme'] : ['MES–ERP integration', 'Real-time monitoring with SCADA'],
+    low: tr ? ['Üretim takibini dijitale taşıma (iş emri, duruş, fire)', 'Makinelerden otomatik veri toplama'] : ['Moving production tracking to digital (work orders, downtime, scrap)', 'Collecting machine data automatically'],
+    mid: tr ? ['Robot ve işbirlikçi robotlarla otomasyon', 'Eski makineleri sensörle bağlama ya da akıllı makineyle yenileme'] : ['Automation with robots and collaborative robots', 'Connecting older machines with sensors, or replacing them with smart ones'],
   },
   {
-    id: 'qual', t: tr ? 'Kalite ve bakım' : 'Quality and maintenance',
-    low: tr ? ['Dijital kalite formları', 'Bakım planlama yazılımı'] : ['Digital quality forms', 'Maintenance planning software'],
-    mid: tr ? ['Makine görmesiyle kalite kontrol', 'Sensörlerle kestirimci bakım'] : ['Quality control with machine vision', 'Predictive maintenance with sensors'],
+    id: 'qual', t: tr ? 'Kalite ve izlenebilirlik' : 'Quality and traceability',
+    low: tr ? ['Dijital kalite kayıtları', 'Parti ve ürün izlenebilirliği'] : ['Digital quality records', 'Batch and product traceability'],
+    mid: tr ? ['Görüntü işlemeyle otomatik kalite kontrol', 'Sensör verisiyle kestirimci bakım'] : ['Automated quality control with machine vision', 'Predictive maintenance from sensor data'],
   },
   {
-    id: 'ware', t: tr ? 'Depo ve tedarik' : 'Warehouse and supply',
-    low: tr ? ['Barkod ya da RFID ile stok takibi', 'Depo yönetim sistemi (WMS)'] : ['Stock tracking with barcodes or RFID', 'Warehouse management system (WMS)'],
-    mid: tr ? ['Otonom mobil robotlar', 'Tedarikçi portalı'] : ['Autonomous mobile robots', 'Supplier portal'],
+    id: 'data', t: tr ? 'Veri ve yönetim' : 'Data and management',
+    low: tr ? ['Kurumsal kaynak planlama (ERP)', 'Dijital iş talimatları'] : ['Enterprise resource planning (ERP)', 'Digital work instructions'],
+    mid: tr ? ['Veri analitiği ve yönetim panoları', 'Yapay zekâ ile tahmin ve optimizasyon'] : ['Analytics and management dashboards', 'Forecasting and optimisation with AI'],
+  },
+  {
+    id: 'ware', t: tr ? 'Depo ve lojistik' : 'Warehouse and logistics',
+    low: tr ? ['Barkod ya da RFID ile stok takibi', 'Depo ve envanter yönetimi'] : ['Stock tracking with barcodes or RFID', 'Warehouse and inventory management'],
+    mid: tr ? ['Talep tahmini ve tedarikçi analizi', 'Rota ve yük planlamasıyla yakıt ve karbon tasarrufu'] : ['Demand forecasting and supplier analysis', 'Route and load planning that saves fuel and emissions'],
   },
   {
     id: 'sales', t: tr ? 'Satış ve müşteri' : 'Sales and customers',
-    low: tr ? ['CRM', 'Web ya da mobil sipariş uygulaması'] : ['CRM', 'Web or mobile ordering app'],
-    mid: tr ? ['Bayi ve müşteri portalı', 'CRM ve ERP entegrasyonu'] : ['Dealer and customer portal', 'CRM–ERP integration'],
+    low: tr ? ['Müşteri ilişkileri yönetimi', 'Web ya da mobil sipariş uygulaması'] : ['Customer relationship management', 'Web or mobile ordering app'],
+    mid: tr ? ['Bayi ve müşteri portalı', 'Satış ve üretim sistemlerinin entegrasyonu'] : ['Dealer and customer portal', 'Integrating sales and production systems'],
   },
   {
-    id: 'fin', t: tr ? 'Finans ve yönetim' : 'Finance and management',
-    low: tr ? ['ERP'] : ['ERP'],
-    mid: tr ? ['Yönetim panoları ve iş zekası'] : ['Management dashboards and business intelligence'],
+    id: 'sec', t: tr ? 'Güvenlik' : 'Security',
+    low: tr ? ['Yedekleme, erişim yönetimi ve güvenlik duvarı', 'Akıllı kamera ve giriş kontrolü'] : ['Backups, access management and a firewall', 'Smart cameras and access control'],
+    mid: tr ? ['Üretim ağını ofis ağından ayırma ve sızma testi', 'Acil durum, afet ve iş güvenliği izleme sistemleri'] : ['Separating production and office networks, plus penetration testing', 'Emergency, disaster and workplace-safety monitoring'],
   },
-  {
-    id: 'sec', t: tr ? 'Siber güvenlik' : 'Cybersecurity',
-    low: tr ? ['Güvenlik duvarı, yedekleme ve erişim yönetimi'] : ['Firewall, backups and access management'],
-    mid: tr ? ['Üretim ağının ofis ağından ayrılması', 'Sızma testi'] : ['Separating production and office networks', 'Penetration testing'],
-  },
-];
-const L = tr
+];const L = tr
   ? { pick: 'Haritayı doldurmak için alanlardan birinde bugünkü durumunuzu seçin.', first: 'Önce bunlar', then: 'Sonra bunlar', good: 'Bu alanlar iyi durumda', legend: 'Alan' }
   : { pick: 'Pick where you are today in any area to start the map.', first: 'Start here', then: 'Then these', good: 'In good shape', legend: 'Area' };
 const C = 50, R = 40;

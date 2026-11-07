@@ -5,7 +5,7 @@ import { routes, SITE, EMAIL, CALENDAR_URL, SOCIAL } from '../i18n/ui';
 export function GET() {
   const svc = (lang: 'tr' | 'en') =>
     services
-      .map((s) => `### ${s.title[lang]}\n${SITE}${servicePath(s, lang)}\n${s.lead[lang]}\n${s.subs.map((x) => `- ${x.t[lang]}: ${x.d[lang]}`).join('\n')}`)
+      .map((s) => `### ${s.title[lang]}\n${SITE}${servicePath(s, lang)}\n${s.lead[lang]}\n${lang === 'tr' ? 'Anahtar konular' : 'Key topics'}: ${s.keywords[lang].join(', ')}\n${s.subs.map((x) => `- ${x.t[lang]}: ${x.d[lang]}`).join('\n')}`)
       .join('\n\n');
   const body = `# C-Level Services (Clevel Services Danışmanlık A.Ş.)
 

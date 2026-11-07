@@ -25,6 +25,7 @@ const schema = [
     name: s.title[lang],
     serviceType: s.name[lang],
     description: s.lead[lang],
+    keywords: s.keywords[lang].join(', '),
     url,
     inLanguage: lang,
     provider: { '@id': `${SITE}/#org` },
@@ -41,7 +42,7 @@ const schema = [
   },
 ];
 ---
-<Base lang={lang} title={`${s.title[lang]} | C-Level Services`} description={s.short[lang]} path={servicePath(s, lang)} alt={servicePath(s, other)} active="services" schema={schema}>
+<Base lang={lang} title={`${s.seo.title[lang]} | C-Level`} description={s.seo.description[lang]} path={servicePath(s, lang)} alt={servicePath(s, other)} active="services" schema={schema}>
   <section class="s-hero">
     <div class="wrap s-hero-grid">
       <div class="s-hero-text">

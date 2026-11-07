@@ -5,6 +5,8 @@ export type Tone = 's1' | 's2' | 's3' | 's4' | 's5';
 export type ToolId = 'funding' | 'turquality' | 'feasibility' | 'digital' | 'scopes';
 
 export interface Sub { t: T; d: T }
+export interface Seo { title: T; description: T }
+export interface Keywords { tr: string[]; en: string[] }
 export interface Service {
   id: 'kaynak' | 'surec' | 'fizibilite' | 'dijital' | 'yesil';
   tone: Tone;
@@ -13,6 +15,10 @@ export interface Service {
   /** Short name for plates and chips */
   name: T;
   short: T;
+  /** <title> and meta description, written around the search terms people actually use */
+  seo: Seo;
+  /** Search terms this page should rank for (schema.org keywords, llms.txt) */
+  keywords: Keywords;
   lead: T;
   net: { center: T; nodes: T[] };
   subs: Sub[];
@@ -33,6 +39,17 @@ export const services: Service[] = [
       tr: 'Hibe, teşvik ve sübvansiyonlu kredilerle büyümenizin finansmanını kuruyoruz.',
       en: 'We finance your growth with grants, incentives and subsidised loans.',
     },
+    seo: {
+      title: { tr: 'Hibe ve Teşvik Danışmanlığı | KOSGEB, TÜBİTAK Proje Danışmanlığı', en: 'Grant and Incentive Advisory in Turkey | KOSGEB, TÜBİTAK' },
+      description: {
+        tr: 'Hibe danışmanlığı, teşvik danışmanlığı, KOSGEB ve TÜBİTAK proje danışmanlığı, ihracat ve e-ihracat destekleri, KOSGEB kredisi, iş kurma ve girişimci destekleri.',
+        en: 'Grant and incentive advisory in Turkey: KOSGEB and TÜBİTAK projects, export and e-export support, subsidised loans, start-up and entrepreneur support.',
+      },
+    },
+    keywords: {
+      tr: ['hibe danışmanlığı', 'teşvik danışmanlığı', 'ihracat destekleri', 'e-ihracat destekleri', 'KOSGEB proje danışmanlığı', 'TÜBİTAK proje danışmanlığı', 'küresel rekabetçilik', 'kapasite geliştirme', 'girişimcilik desteği', 'teknoyatırım', 'dijital dönüşüm desteği', 'KOSGEB kredisi', 'iş kurma desteği', 'kadın girişimci desteği', 'genç girişimci desteği'],
+      en: ['grant advisory Turkey', 'incentive advisory Turkey', 'export support', 'e-export support', 'KOSGEB project consultancy', 'TÜBİTAK project consultancy', 'global competitiveness', 'capacity building', 'entrepreneurship support', 'KOSGEB loan', 'start-up support', 'women entrepreneur support', 'young entrepreneur support'],
+    },
     lead: {
       tr: 'Ana işimiz kamu hibeleri, teşvikler ve faiz destekli krediler. Programı seçer, başvuruyu hazırlar, projeyi kapanışa kadar takip ederiz. Kamu kaynağının yetmediği yerde yatırımınıza uygun başka finansman seçeneklerini de araştırırız.',
       en: 'Our core work is public grants, incentives and interest-subsidised loans. We choose the programme, prepare the application and follow the project through to close-out. Where public funding is not enough, we also look for other financing that fits your investment.',
@@ -52,22 +69,50 @@ export const services: Service[] = [
       {
         t: { tr: 'Hibe ve destek programları', en: 'Grants and support programmes' },
         d: {
-          tr: 'TÜBİTAK, KOSGEB, kalkınma ajansları ve bakanlık programlarında doğru çağrıyı seçip başvuruyu hazırlarız.',
+          tr: 'TÜBİTAK ve KOSGEB projelerinde, kalkınma ajansı ve bakanlık programlarında doğru çağrıyı seçer, başvuruyu hazırlarız.',
           en: 'We pick the right call across TÜBİTAK, KOSGEB, development agency and ministry programmes and prepare the application.',
         },
       },
       {
-        t: { tr: 'Yatırım teşvikleri', en: 'Investment incentives' },
+        t: { tr: 'Girişimcilik destekleri', en: 'Entrepreneurship support' },
         d: {
-          tr: 'Yatırım Teşvik Belgesi ile KDV istisnası, gümrük muafiyeti, vergi indirimi ve sigorta primi desteği gibi avantajlardan yararlanmanızı sağlarız.',
-          en: 'With an Investment Incentive Certificate you can benefit from VAT exemption, customs duty exemption, tax reductions and social security support.',
+          tr: 'İş kurma desteği, kadın girişimci ve genç girişimci destekleri gibi programlarla yeni işletmenizin ilk yatırımına kaynak buluruz.',
+          en: 'We find funding for a new company’s first investment through start-up, women entrepreneur and young entrepreneur programmes.',
         },
       },
       {
-        t: { tr: 'Sübvansiyonlu krediler', en: 'Subsidised loans' },
+        t: { tr: 'İhracat ve e-ihracat destekleri', en: 'Export and e-export support' },
         d: {
-          tr: 'KOSGEB, Türk Eximbank ve kamu destekli kefalet sistemi üzerinden faiz yükü düşürülmüş kredilere erişimi planlarız.',
+          tr: 'Yurt dışı pazarlama, fuar, pazar araştırması ve e-ihracat harcamalarınız için devlet desteklerinden yararlanmanızı sağlarız.',
+          en: 'We help you use state support for overseas marketing, trade fairs, market research and e-export spending.',
+        },
+      },
+      {
+        t: { tr: 'Kapasite geliştirme ve küresel rekabetçilik', en: 'Capacity building and global competitiveness' },
+        d: {
+          tr: 'İşletmenizin ya da sektörünüzün rekabet gücünü artıran kapasite geliştirme projelerini kurgular, başvuruyu hazırlarız.',
+          en: 'We design capacity-building projects that raise the competitiveness of your company or sector, and prepare the application.',
+        },
+      },
+      {
+        t: { tr: 'Yatırım teşvikleri ve Teknoyatırım', en: 'Investment incentives' },
+        d: {
+          tr: 'Yatırım Teşvik Belgesi ve Teknoyatırım gibi teknoloji odaklı programlarla KDV istisnası, gümrük muafiyeti, vergi indirimi ve sigorta primi desteğinden yararlanmanızı sağlarız.',
+          en: 'With an Investment Incentive Certificate and technology-focused programmes you can benefit from VAT and customs exemptions, tax reductions and social security support.',
+        },
+      },
+      {
+        t: { tr: 'KOSGEB kredisi ve sübvansiyonlu krediler', en: 'Subsidised loans' },
+        d: {
+          tr: 'KOSGEB kredisi, Türk Eximbank ve kamu destekli kefalet sistemi üzerinden faiz yükü düşürülmüş kredilere erişimi planlarız.',
           en: 'We plan access to lower-interest loans through KOSGEB, Türk Eximbank and the state-backed credit guarantee system.',
+        },
+      },
+      {
+        t: { tr: 'Dijital ve yeşil dönüşüm destekleri', en: 'Digital and green transition funding' },
+        d: {
+          tr: 'Dijital dönüşüm ve yeşil dönüşüm yatırımlarınız için uygun hibe ve kredi programlarını belirler, başvuruyu yönetiriz.',
+          en: 'We identify grant and loan programmes for your digital and green transition investments and manage the application.',
         },
       },
       {
@@ -110,8 +155,19 @@ export const services: Service[] = [
     title: { tr: 'Süreç ve Kurumsallaşma Danışmanlığı', en: 'Process and Governance Advisory' },
     name: { tr: 'Süreç ve kurumsallaşma', en: 'Process and governance' },
     short: {
-      tr: 'Turquality yolculuğunda markanızı ve şirketinizi programın beklediği kurumsal yapıya hazırlıyoruz.',
+      tr: 'Turquality danışmanlığı: markanızı ve şirketinizi programın beklediği kurumsal yapıya hazırlıyoruz.',
       en: 'We prepare your brand and company for the corporate structure the Turquality programme expects.',
+    },
+    seo: {
+      title: { tr: 'Turquality Danışmanlığı | Süreç ve Kurumsallaşma', en: 'Turquality Consultancy | Process and Governance' },
+      description: {
+        tr: 'Turquality danışmanlığı: Turquality ve Marka Destek Programı başvurusu, kurumsallaşma, strateji, süreç tasarımı ve program dönemi raporlaması.',
+        en: 'Turquality consultancy: Turquality and Brand Support applications, governance, strategy, process design and programme-period reporting.',
+      },
+    },
+    keywords: {
+      tr: ['Turquality danışmanlığı', 'Turquality başvurusu', 'Marka Destek Programı', 'kurumsallaşma danışmanlığı', 'süreç danışmanlığı'],
+      en: ['Turquality consultancy', 'Turquality application', 'Brand Support Programme', 'corporate governance advisory'],
     },
     lead: {
       tr: 'Bu hizmeti Turquality ve Marka Destek Programı kapsamında veriyoruz. Programa girmek kadar, program süresince kurumsal gelişimi sürdürmek ve harcamaları doğru raporlamak da belirleyici.',
@@ -186,6 +242,17 @@ export const services: Service[] = [
       tr: 'Teşvik belgesi, kamu projesi, banka kredisi ya da pazara giriş kararı için yatırımın sayısal gerekçesini hazırlıyoruz.',
       en: 'We build the numerical case for an investment: for an incentive certificate, a public project, a bank loan or a market-entry decision.',
     },
+    seo: {
+      title: { tr: 'Fizibilite Raporu ve Yatırım Teşvik Belgesi Danışmanlığı', en: 'Feasibility Studies and Investment Incentive Certificates in Turkey' },
+      description: {
+        tr: 'Yatırım Teşvik Belgesi, kamu destekli projeler ve banka proje finansmanı için fizibilite raporu; Türkiye’ye yatırım yapacak firmalar için pazar araştırması.',
+        en: 'Feasibility studies for Investment Incentive Certificates, public projects and bank project finance, plus market research for companies investing in Turkey.',
+      },
+    },
+    keywords: {
+      tr: ['fizibilite raporu', 'yatırım teşvik belgesi', 'yatırım fizibilitesi', 'proje finansmanı', 'pazar araştırması'],
+      en: ['feasibility study Turkey', 'investment incentive certificate', 'project finance report', 'market research Turkey'],
+    },
     lead: {
       tr: 'Fizibiliteyi çoğunlukla Yatırım Teşvik Belgesi ve kamu destekli projeler için hazırlıyoruz. Teşvikten bağımsız da çalışıyoruz: bankaların proje finansmanı için istediği raporları ve Türkiye’ye yatırım düşünen yabancı firmalar için pazar araştırmalarını da yapıyoruz.',
       en: 'We mostly prepare feasibility studies for Investment Incentive Certificates and publicly funded projects. We also work independently of incentives: bank reports for project finance, and market research for foreign companies considering Turkey.',
@@ -256,20 +323,31 @@ export const services: Service[] = [
     title: { tr: 'Dijital Dönüşüm Danışmanlığı', en: 'Digital Transformation Advisory' },
     name: { tr: 'Dijital dönüşüm', en: 'Digital transformation' },
     short: {
-      tr: 'İş süreçlerinizi ve üretiminizi yazılım, donanım ve güvenlik çözümleriyle dijitalleştiriyoruz.',
-      en: 'We digitise your processes and production with software, hardware and security solutions.',
+      tr: 'Dijitalleşmeyle verimliliği artırıyoruz: üretimden lojistiğe, kaliteden siber güvenliğe kadar yazılım, donanım ve uygulama çözümleri.',
+      en: 'We raise productivity through digitalisation: software, hardware and apps from production to logistics, quality to cybersecurity.',
+    },
+    seo: {
+      title: { tr: 'Dijital Dönüşüm Danışmanlığı | Dijitalleşme ve Verimlilik', en: 'Digital Transformation Advisory | Digitalisation and Productivity' },
+      description: {
+        tr: 'Dijital dönüşüm ve dijitalleşme ile verimlilik: akıllı üretim, kalite ve izlenebilirlik, üretim yazılımları, siber güvenlik, lojistik ve web/mobil uygulamalar.',
+        en: 'Digital transformation for productivity: smart manufacturing, quality and traceability, production software, cybersecurity, logistics and web/mobile apps.',
+      },
+    },
+    keywords: {
+      tr: ['dijital dönüşüm', 'dijitalleşme', 'verimlilik', 'dijital dönüşüm destek programı', 'akıllı üretim', 'endüstriyel nesnelerin interneti', 'mobil uygulama geliştirme'],
+      en: ['digital transformation', 'digitalisation', 'productivity', 'smart manufacturing', 'industrial IoT', 'mobile app development'],
     },
     lead: {
-      tr: 'Web ya da mobil uygulama yaptırmaktan fabrikada üretim verisini toplamaya kadar sistem, donanım, yazılım ve güvenlik tarafında çözüm kuruyoruz. Uygun projelerde Sanayi ve Teknoloji Bakanlığı Dijital Dönüşüm Destek Programı’ndan yararlanmanızı da sağlıyoruz.',
-      en: 'From building a web or mobile app to collecting production data on the factory floor, we deliver systems, hardware, software and security. Where it fits, we also help you use the Ministry of Industry and Technology’s Digital Transformation Support Programme.',
+      tr: 'Dijital dönüşümü bir yazılım satın almak değil, verimliliği ölçülebilir biçimde artırmak olarak görüyoruz. İhtiyacı belirler, çözümü kurar ve çalışır halde bırakırız; uygun yatırımlarda Dijital Dönüşüm Destek Programı’ndan yararlanmanızı sağlarız.',
+      en: 'We see digital transformation not as buying software but as raising productivity in a way you can measure. We define the need, put the solution in place and leave it running, and where the investment qualifies we help you use the Digital Transformation Support Programme.',
     },
     net: {
       center: { tr: 'İşletmeniz', en: 'Your business' },
       nodes: [
-        { tr: 'ERP', en: 'ERP' },
-        { tr: 'MES', en: 'MES' },
-        { tr: 'IoT', en: 'IoT' },
-        { tr: 'Robotik', en: 'Robotics' },
+        { tr: 'Akıllı üretim', en: 'Smart production' },
+        { tr: 'Kalite', en: 'Quality' },
+        { tr: 'Veri ve yapay zekâ', en: 'Data and AI' },
+        { tr: 'Lojistik', en: 'Logistics' },
         { tr: 'Mobil uygulama', en: 'Mobile apps' },
         { tr: 'Siber güvenlik', en: 'Cybersecurity' },
       ],
@@ -278,43 +356,57 @@ export const services: Service[] = [
       {
         t: { tr: 'Web ve mobil uygulamalar', en: 'Web and mobile apps' },
         d: {
-          tr: 'İş süreçlerinizi kolaylaştıran web ve mobil uygulamaları tasarlar ve geliştiririz.',
-          en: 'We design and build web and mobile apps that make your processes easier.',
+          tr: 'İş süreçlerinizi kolaylaştıran web ve mobil uygulamaları tasarlar, geliştirir ve yayında tutarız.',
+          en: 'We design, build and keep running web and mobile apps that make your processes easier.',
         },
       },
       {
-        t: { tr: 'Üretimde dijitalleşme', en: 'Digital production' },
+        t: { tr: 'Akıllı üretim ve otomasyon', en: 'Smart production and automation' },
         d: {
-          tr: 'MES, SCADA, sensör ve makine verisiyle üretimi izlenebilir ve ölçülebilir hale getiririz.',
-          en: 'With MES, SCADA, sensors and machine data we make production visible and measurable.',
+          tr: 'Robotlar, işbirlikçi robotlar, katmanlı imalat ve otonom taşıma ile üretimi otomatikleştirir; mevcut makineleri sensörlerle bağlanabilir hale getiririz.',
+          en: 'We automate production with robots, collaborative robots, additive manufacturing and autonomous handling, and connect existing machines with sensors.',
         },
       },
       {
-        t: { tr: 'Kurumsal yazılımlar', en: 'Enterprise software' },
+        t: { tr: 'Kalite ve izlenebilirlik', en: 'Quality and traceability' },
         d: {
-          tr: 'ERP, CRM ve PLM gibi sistemlerin seçimi, kurulumu ve entegrasyonunda yanınızdayız.',
-          en: 'We help you choose, set up and integrate systems such as ERP, CRM and PLM.',
+          tr: 'Görüntü işlemeyle kalite kontrol, malzeme muayenesi ve parti bazında izlenebilirlik sistemleri kurarız.',
+          en: 'We set up machine-vision quality control, material inspection and batch-level traceability.',
         },
       },
       {
-        t: { tr: 'Otomasyon ve donanım', en: 'Automation and hardware' },
+        t: { tr: 'Üretim yazılımları, veri ve yapay zekâ', en: 'Production software, data and AI' },
         d: {
-          tr: 'Robotik otomasyon, makine görmesi ve endüstriyel ağ altyapısını planlarız.',
-          en: 'We plan robotic automation, machine vision and industrial network infrastructure.',
+          tr: 'Üretim ve bakım yönetimi, makine izleme, veri analitiği, simülasyon, yapay zekâ, süreç madenciliği ve dijital iş talimatlarıyla kararları veriye dayandırırız.',
+          en: 'With production and maintenance management, machine monitoring, analytics, simulation, AI, process mining and digital work instructions, decisions rest on data.',
         },
       },
       {
-        t: { tr: 'Siber güvenlik', en: 'Cybersecurity' },
+        t: { tr: 'Siber güvenlik ve ağ altyapısı', en: 'Cybersecurity and networks' },
         d: {
-          tr: 'Ofis ve üretim sistemlerinizi siber tehditlere karşı korumak için gereken önlemleri kurarız.',
-          en: 'We put in place the measures that protect your office and production systems from cyber threats.',
+          tr: 'Fabrika genelinde kesintisiz ağ bağlantısını kurar; ağları, verileri ve makineleri siber saldırılara ve yetkisiz erişime karşı koruruz.',
+          en: 'We build reliable site-wide connectivity and protect networks, data and machines from cyber attacks and unauthorised access.',
+        },
+      },
+      {
+        t: { tr: 'İş güvenliği ve risk yönetimi', en: 'Safety and risk management' },
+        d: {
+          tr: 'Acil durum ve afet izleme, akıllı tesis güvenliği ve çalışan sağlığı için uyarı veren akıllı sistemleri planlarız.',
+          en: 'We plan emergency and disaster monitoring, smart site security and smart systems that warn about risks to workers.',
+        },
+      },
+      {
+        t: { tr: 'Tedarik ve lojistikte dijitalleşme', en: 'Digital supply chain and logistics' },
+        d: {
+          tr: 'Ürün takibi, talep tahmini, otomatik envanter ve depo yönetimi, yakıtı ve karbon emisyonunu azaltan rota ve yük planlaması kurarız.',
+          en: 'We set up shipment tracking, demand forecasting, automated inventory and warehouse management, and route and load planning that cuts fuel and emissions.',
         },
       },
       {
         t: { tr: 'Dijital Dönüşüm Destek Programı', en: 'Digital Transformation Support Programme' },
         d: {
-          tr: 'Uygun ürünler için Bakanlığın dijital dönüşüm desteğine başvuruyu hazırlarız.',
-          en: 'For eligible products we prepare the application to the ministry’s digital transformation support.',
+          tr: 'Yatırımınızın programa uygunluğunu değerlendirir, başvuruyu ve gider gerekçelerini hazırlarız.',
+          en: 'We assess whether your investment qualifies and prepare the application and cost justification.',
         },
       },
     ],
@@ -325,8 +417,8 @@ export const services: Service[] = [
       en: 'Pick where you are today in each area. The map shows which solutions come first.',
     },
     toolNote: {
-      tr: 'Bir uygulama yaptırmak artık kolay. Zor olan, onu üretimin ve ekibin gerçek akışına oturtmak, sonra da yaşatmak. Önerilen çözümlerin önemli kısmı Dijital Dönüşüm Destek Programı kapsamına girebilir; güncel ürün listesini birlikte kontrol ederiz.',
-      en: 'Building an app is easy now. The hard part is fitting it into how production and people really work, and keeping it alive afterwards. Many of the suggested solutions may qualify for the Digital Transformation Support Programme; we check the current product list together.',
+      tr: 'Bir uygulama yaptırmak artık kolay. Zor olan, onu üretimin ve ekibin gerçek akışına oturtmak, sonra da yaşatmak. Önerilen çözümlerin önemli kısmı Dijital Dönüşüm Destek Programı kapsamına girebilir; hangilerinin uygun olduğunu birlikte değerlendiririz.',
+      en: 'Building an app is easy now. The hard part is fitting it into how production and people really work, and keeping it alive afterwards. Many of the suggested solutions may qualify for the Digital Transformation Support Programme; we assess together which ones do.',
     },
   },
   {
@@ -336,8 +428,19 @@ export const services: Service[] = [
     title: { tr: 'Yeşil Dönüşüm Danışmanlığı', en: 'Green Transition Advisory' },
     name: { tr: 'Yeşil dönüşüm', en: 'Green transition' },
     short: {
-      tr: 'Karbon ayak izinizi ölçüyor, SKDM ve sürdürülebilirlik raporlamasına hazırlıyoruz.',
+      tr: 'Karbon ayak izi hesaplama ve SKDM raporlamasıyla şirketinizi yeşil dönüşüme hazırlıyoruz.',
       en: 'We measure your carbon footprint and prepare you for CBAM and sustainability reporting.',
+    },
+    seo: {
+      title: { tr: 'Karbon Ayak İzi Hesaplama ve SKDM Raporlama | Yeşil Dönüşüm', en: 'Carbon Footprint Calculation and CBAM Reporting | Green Transition' },
+      description: {
+        tr: 'Karbon ayak izi hesaplama (Kapsam 1, 2, 3), SKDM raporlama, ürün ve su ayak izi, ESG ve sürdürülebilirlik raporu, azaltım ve net sıfır planı.',
+        en: 'Carbon footprint calculation (Scope 1, 2, 3), CBAM reporting, product and water footprints, ESG and sustainability reports, reduction and net-zero plans.',
+      },
+    },
+    keywords: {
+      tr: ['karbon ayak izi hesaplama', 'SKDM raporlama', 'SKDM', 'yeşil dönüşüm', 'sürdürülebilirlik raporu', 'ESG'],
+      en: ['carbon footprint calculation', 'CBAM reporting', 'green transition', 'sustainability reporting', 'ESG'],
     },
     lead: {
       tr: 'Avrupa Birliği’ne ihracat yapan ve büyük müşterilere tedarik sağlayan şirketlerden artık emisyon verisi isteniyor. Ölçümden azaltım planına, SKDM bildiriminden sürdürülebilirlik raporuna kadar süreci uluslararası standartlara uygun yürütüyoruz.',

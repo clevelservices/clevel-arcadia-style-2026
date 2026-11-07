@@ -1,8 +1,8 @@
 export const home = {
   tr: {
-    title: 'C-Level Services | Hibe, teşvik ve dönüşüm danışmanlığı',
+    title: 'C-Level Services | Hibe ve Teşvik Danışmanlığı, Turquality, Dijital ve Yeşil Dönüşüm',
     description:
-      'Kamu hibeleri, teşvikler ve sübvansiyonlu kredilerle kaynak geliştirme; Turquality kurumsallaşma, yatırım fizibilitesi, dijital ve yeşil dönüşüm danışmanlığı.',
+      'Hibe ve teşvik danışmanlığı, KOSGEB ve TÜBİTAK proje danışmanlığı, ihracat destekleri, Turquality, fizibilite raporu, dijital dönüşüm ve karbon ayak izi hesaplama.',
     h1: 'Doğru kaynak. Doğru dönüşüm.',
     lead: 'Büyümenizi hibe, teşvik ve sübvansiyonlu kredilerle finanse ediyor; kurumsallaşma, fizibilite, dijital ve yeşil dönüşümde yanınızda oluyoruz.',
     dragHint: 'Bir hizmeti logoya sürükleyin ya da üzerine tıklayın.',
