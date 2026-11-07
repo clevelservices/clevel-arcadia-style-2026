@@ -1,0 +1,10 @@
+{
+  // Private notification mailer, deployed by Cloudflare Workers Builds from this folder.
+  "name": "clevel-mailer",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-07",
+  // Not reachable from the internet: the site calls it through a service binding only.
+  "workers_dev": false,
+  "preview_urls": false,
+  "send_email": [{ "name": "EMAIL" }]
+}
