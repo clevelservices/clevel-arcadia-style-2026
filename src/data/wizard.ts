@@ -138,7 +138,7 @@ export const programmes: { when: string[]; unless?: string[]; text: T; why: T }[
   {
     when: ['goal_rd'],
     unless: ['no_rd', 'idea'],
-    text: { tr: 'KOSGEB Ar-Ge ve inovasyon destekleri, teknopark', en: 'KOSGEB R&D and innovation support, technoparks' },
+    text: { tr: 'Teknopark ve TEKMER', en: 'Technoparks and TEKMER technology development centres' },
     why: { tr: 'TÜBİTAK’a alternatif ya da tamamlayıcı olarak değerlendirilebilir.', en: 'Can be an alternative or a complement to TÜBİTAK.' },
   },
   {
